@@ -20,26 +20,44 @@ body{background:var(--pv-paper)}
 .guide-steps{border-top:4px solid var(--pv-yellow)}
 .notice{border-left:5px solid #f59e0b}.related-box{border-top:4px solid var(--pv-yellow)}
 @media(max-width:600px){.logo{width:68px;height:85px;flex-basis:68px}.brand{font-size:18px}}
-.tabicon{margin-right:5px}.protocol-icon{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-right:8px;border-radius:8px;background:#f5f5f4;font-size:19px;vertical-align:middle}.card .title{display:flex;align-items:center;padding-right:32px}.card .fav+.title{padding-right:0}.quick-card b{font-size:15px}.guide-steps h3:before{content:'🚒 ';}.home-alert:before{content:'⚠️ ';}</style></head><body>
+.tabicon{margin-right:5px}.protocol-icon{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-right:8px;border-radius:8px;background:#f5f5f4;font-size:19px;vertical-align:middle}.card .title{display:flex;align-items:center;padding-right:32px}.card .fav+.title{padding-right:0}.quick-card b{font-size:15px}.guide-steps h3:before{content:'🚒 ';}.home-alert:before{content:'⚠️ ';}
+/* PVFD restrained field-reference visual layer — presentation only */
+:root{--pvfd-red:#8f1d21;--pvfd-charcoal:#20242a;--pvfd-ink:#1f2937;--pvfd-muted:#64748b;--pvfd-line:#e2e8f0;--pvfd-bg:#f5f6f7;--pvfd-gold:#c9a227}
+body{background:var(--pvfd-bg);color:var(--pvfd-ink)}
+.top{background:var(--pvfd-charcoal);border-bottom:3px solid var(--pvfd-red);box-shadow:none}
+.sub{color:#d1d5db;opacity:1}.status{background:#ffffff10;border:1px solid #ffffff20}
+.rolebtn,.homebtn,.clearsearch{background:#ffffff0d;border-color:#ffffff2b}.rolebtn.on{background:#fff;color:var(--pvfd-red);border-color:#fff;box-shadow:none}
+.tabs{background:#fff;border-bottom:1px solid var(--pvfd-line);padding-top:8px;padding-bottom:8px}
+.tab{background:#f1f3f5;color:#374151;border:1px solid #e5e7eb;font-weight:750}.tab.on{background:var(--pvfd-red);color:#fff;border-color:var(--pvfd-red);box-shadow:none}
+.tabicon{display:inline-flex;min-width:18px;justify-content:center;margin-right:5px;font-family:Arial,sans-serif;font-size:12px;font-weight:900}
+.card{border:1px solid var(--pvfd-line);border-left:3px solid #cbd5e1;box-shadow:0 1px 2px #0000000a}.card:active{border-left-color:var(--pvfd-red)}
+.protocol-icon{font-family:Arial,sans-serif;font-size:11px;font-weight:900;color:var(--pvfd-red);background:#f8fafc;border:1px solid #e2e8f0;box-shadow:none}
+.quick-card{border:1px solid var(--pvfd-line);border-top:3px solid #d6d9dd;box-shadow:none}.quick-card b{color:var(--pvfd-ink)}
+.home-hero{background:#fff;color:var(--pvfd-ink);border:1px solid var(--pvfd-line);border-top:4px solid var(--pvfd-red);box-shadow:none}.home-hero h2{color:var(--pvfd-red)}.home-hero p{color:#374151}
+.section{background:#f8fafc;color:var(--pvfd-red);border:1px solid var(--pvfd-line);border-left:4px solid var(--pvfd-red);margin-left:0;margin-right:0;text-transform:none}
+.source,.dose-btn{background:var(--pvfd-red);border-bottom:0}.back{background:#e9ecef;color:#1f2937;border:1px solid #d8dde3;border-bottom:0}
+.guide-steps{border-top:1px solid var(--pvfd-line)}.guide-steps h3:before{content:''}.home-alert:before{content:''}
+.notice,.related-box{border-color:var(--pvfd-line);border-left:3px solid var(--pvfd-gold);border-top:1px solid var(--pvfd-line)}
+</style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="pvfd-logo.jpg" alt="Pleasant Valley Fire Department patch"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
 let data=[],cat='Home';const cats=['All','Favorites','Medical','Trauma','Procedures','Medications','Guidelines','Appendix','Tools'];
-const catIcons={All:'📋',Favorites:'⭐',Medical:'🩺',Trauma:'🩸',Procedures:'🛠️',Medications:'💊',Guidelines:'📖',Appendix:'📚',Tools:'🧮'};
+const catIcons={All:'▦',Favorites:'★',Medical:'✚',Trauma:'◆',Procedures:'⚙',Medications:'Rx',Guidelines:'§',Appendix:'≡',Tools:'ƒx'};
 const protocolIcon=x=>{
  const t=(displayTitle(x)+' '+(x.search||'')+' '+(x.aliases||[]).join(' ')).toLowerCase();
- if(/burn|thermal/.test(t))return '🔥';
- if(/cardiac|chest pain|stemi|brady|tachy|fibrillation|asystole|pea|resuscitation/.test(t))return '🫀';
- if(/airway|asthma|copd|wheez|respirat|pulmonary|chf|oxygen/.test(t))return '🫁';
- if(/stroke|seizure|syncope|altered mental|neurolog/.test(t))return '🧠';
- if(/pediatric|child|infant|neonatal|brue/.test(t))return '👶';
- if(/childbirth|pregnan|obstetric/.test(t))return '🤰';
- if(/trauma|injury|fracture|spinal|head|chest seal|tourniquet|cat /.test(t))return '🩸';
- if(x.category==='Medications')return '💊';
- if(x.category==='Procedures')return '🛠️';
- if(x.category==='Appendix')return '📚';
- if(x.category==='Guidelines')return '📖';
- return x.category==='Medical'?'🩺':'📋';
-};let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
+ if(/cardiac|chest pain|stemi|brady|tachy|fibrillation|asystole|pea|resuscitation/.test(t))return '♥';
+ if(/airway|asthma|copd|wheez|respirat|pulmonary|chf|oxygen/.test(t))return 'AIR';
+ if(/stroke|seizure|syncope|altered mental|neurolog/.test(t))return 'CNS';
+ if(/burn|thermal/.test(t))return 'BRN';
+ if(/pediatric|child|infant|neonatal|brue/.test(t))return 'PED';
+ if(/childbirth|pregnan|obstetric/.test(t))return 'OB';
+ if(/trauma|injury|fracture|spinal|head|chest seal|tourniquet|cat /.test(t))return '◆';
+ if(x.category==='Medications')return 'Rx';
+ if(x.category==='Procedures')return '⚙';
+ if(x.category==='Appendix')return '≡';
+ if(x.category==='Guidelines')return '§';
+ return x.category==='Medical'?'✚':'•';
+}let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function tabs(){let visible=role==='EMT'?cats.filter(c=>c!=='Medications'):cats;document.querySelector('#tabs').innerHTML=visible.map(c=>`<button class="tab ${c===cat?'on':''}" onclick="setCat('${c}')"><span class="tabicon">${catIcons[c]||'📋'}</span>${c}</button>`).join('')}
 function leaveDetail(){location.hash='';document.querySelector('#detail').classList.remove('on');document.querySelector('#list').classList.remove('off')}
@@ -55,10 +73,10 @@ function renderHome(){
     <p>Choose your certification level, search the patient problem or medication, then open the matching protocol. Use the source button whenever exact department wording or layout is needed.</p>
    </div>
    <div class="quick-grid">
-    <button class="quick-card" onclick="setCat('Medical')"><b>🩺 Medical</b><span>Medical emergencies, cardiac, airway, pediatric and OB.</span></button>
-    <button class="quick-card" onclick="setCat('Trauma')"><b>🩸 Trauma</b><span>Trauma protocols, burns and injury-specific care.</span></button>
-    <button class="quick-card" onclick="setCat('Medications')"><b>💊 Medications</b><span>Quick drug reference, dosing and weight-based calculators.</span></button>
-    <button class="quick-card" onclick="setCat('Procedures')"><b>🛠️ Procedures</b><span>Airway, vascular access, monitoring and field procedures.</span></button>
+    <button class="quick-card" onclick="setCat('Medical')"><b>✚ Medical</b><span>Medical emergencies, cardiac, airway, pediatric and OB.</span></button>
+    <button class="quick-card" onclick="setCat('Trauma')"><b>◆ Trauma</b><span>Trauma protocols, burns and injury-specific care.</span></button>
+    <button class="quick-card" onclick="setCat('Medications')"><b>Rx Medications</b><span>Quick drug reference, dosing and weight-based calculators.</span></button>
+    <button class="quick-card" onclick="setCat('Procedures')"><b>⚙ Procedures</b><span>Airway, vascular access, monitoring and field procedures.</span></button>
    </div>
    <div class="guide-steps">
     <h3>Quick use guide</h3>
