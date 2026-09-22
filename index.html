@@ -183,9 +183,44 @@ function renderPatientMeds(){
     </div>
     <div class="patient-med-warning" style="margin-top:10px"><b>Reference only:</b> Use this to identify a patient's reported medication and review manufacturer/FDA labeling. Do not use this section to select or calculate EMS treatment. Follow PVFire protocols and Medical Control.</div>
    </div>
+   <div class="patient-med-search">
+    <h2 style="font-size:18px">Overdose / AMS Tools</h2>
+    <div class="quick-grid">
+     <button class="quick-card" onclick="showPatientMedPillCount()"><b>🔢 Pill Count</b><span>Estimate pills missing from a prescription bottle.</span></button>
+     <button class="quick-card" onclick="showPatientMedPillId()"><b>💊 Pill Identifier</b><span>Identify a pill using imprint, color, and shape.</span></button>
+    </div>
+   </div>
    <div id="patientMedResult" class="patient-med-result"></div>
   </div>`;
  const i=document.querySelector('#patientMedQ');if(i){i.focus();i.addEventListener('keydown',e=>{if(e.key==='Enter')lookupPatientMedication()})}
+}
+function showPatientMedPillCount(){
+ const host=document.getElementById('patientMedResult');
+ host.innerHTML=`
+  <div class="tool-card"><h3>🔢 Pill Count</h3>
+   <div class="tool-note">Use when a prescription bottle is available and you need a quick estimate of how many pills may be missing.</div>
+   <div class="calc-field"><label for="pcQty">Quantity originally dispensed</label><input id="pcQty" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 30"></div>
+   <div class="calc-field"><label for="pcRemain">Pills currently in bottle</label><input id="pcRemain" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 12"></div>
+   <div class="calc-field"><label for="pcExpected">Expected doses already taken (optional)</label><input id="pcExpected" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 8"></div>
+   <button class="tool-btn" onclick="calcPillCount()">Calculate</button>
+   <div id="pcResult" class="tool-result" style="display:none"></div>
+   <div class="patient-med-warning" style="margin-top:10px"><b>Important:</b> This is only an estimate. Refill timing, PRN use, pill organizers, missed doses, and pills stored elsewhere can change the expected count.</div>
+  </div>`;
+ host.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showPatientMedPillId(){
+ const host=document.getElementById('patientMedResult');
+ host.innerHTML=`
+  <div class="tool-card"><h3>💊 Pill Identifier</h3>
+   <div class="tool-note">Start with the exact imprint stamped on the tablet or capsule. Add color and shape to narrow the results.</div>
+   <div class="calc-field"><label for="pillImprint">Imprint</label><input id="pillImprint" class="tool-input" autocomplete="off" placeholder="Example: L484 or M 367"></div>
+   <div class="calc-field"><label for="pillColor">Color (optional)</label><input id="pillColor" class="tool-input" autocomplete="off" placeholder="Example: white"></div>
+   <div class="calc-field"><label for="pillShape">Shape (optional)</label><input id="pillShape" class="tool-input" autocomplete="off" placeholder="Example: round, oval, capsule"></div>
+   <button class="tool-btn" onclick="openPillIdentifier()">Search Pill Identifier</button>
+   <div class="patient-med-warning" style="margin-top:10px"><b>Do not identify by color alone.</b> Verify the imprint and appearance against the identifier results and the patient's bottle when available.</div>
+   <div class="tool-note" style="margin-top:10px">Poison Control: <a href="tel:18002221222"><b>1-800-222-1222</b></a></div>
+  </div>`;
+ host.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function patientMedTrim(v,max=1300){
  const s=Array.isArray(v)?v.join('\n\n'):String(v||'');
