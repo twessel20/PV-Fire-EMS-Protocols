@@ -39,7 +39,9 @@ function renderHome(){
 function setRole(r){role=r;localStorage.setItem('pvfdRole',r);document.querySelector('#emtBtn').classList.toggle('on',r==='EMT');document.querySelector('#medicBtn').classList.toggle('on',r==='PARAMEDIC');if(document.querySelector('#detail').classList.contains('on')&&location.hash)openP(location.hash.slice(1));else render()}
 function roleUI(){document.querySelector('#emtBtn').classList.toggle('on',role==='EMT');document.querySelector('#medicBtn').classList.toggle('on',role==='PARAMEDIC')}
 function status(){let on=navigator.onLine;document.querySelector('#net').textContent=on?'Online':'Offline';document.querySelector('#offline').classList.toggle('on',!on)}addEventListener('online',status);addEventListener('offline',status);status();
-function flags(x){let t=(x.lines||[]).join(' ').toUpperCase(),a=[];if(t.includes('BLS OR ALS'))a.push('<span class="flag bls">BLS OR ALS</span>');if(t.includes('ALS ONLY'))a.push('<span class="flag als">ALS ONLY</span>');if(t.includes('MEDICAL CONTROL'))a.push('<span class="flag mc">MEDICAL CONTROL</span>');return a.join('')}
+function scopeText(x){return (x.lines||[]).join(' ').toUpperCase()}
+function isAlsOnly(x){const t=scopeText(x);return t.includes('ALS ONLY')&&!t.includes('BLS OR ALS')}
+function flags(x){let t=scopeText(x),a=[];if(t.includes('BLS OR ALS'))a.push('<span class="flag bls">'+(role==='EMT'?'BLS / BLS-ALS':'BLS OR ALS')+'</span>');if(role!=='EMT'&&t.includes('ALS ONLY'))a.push('<span class="flag als">ALS ONLY</span>');if(t.includes('MEDICAL CONTROL'))a.push('<span class="flag mc">MEDICAL CONTROL</span>');return a.join('')}
 function displayTitle(x){if(/^Combined\s+/i.test(x.title))return x.title.replace(/^Combined\s+/i,'');return x.title}
 const appendixMap={
   '12-lead-ecg-monitoring':['12-lead-ecg-interpretation'],
@@ -247,6 +249,7 @@ function render(){
  if(cat==='Tools'){renderTools();renderBurnMap();return}
  let q=normText(document.querySelector('#q').value).toLowerCase(),a=[];
  const matchesSearch=x=>{
+   if(role==='EMT'&&isAlsOnly(x))return false;
    if(!q)return true;
    const terms=q.split(/\s+/).filter(Boolean);
    const hay=normText([x.title,x.category,x.search,(x.aliases||[]).join(' '),(x.lines||[]).join(' ')].join(' ')).toLowerCase();
@@ -260,10 +263,10 @@ function render(){
      if(!a.length)a=data.filter(x=>x.category==='Appendix'&&matchesSearch(x));
    }else{
      const primary=['12-lead-ecg-interpretation','cincinnati-prehospital-stroke-scale','apgar-score','glasgow-coma-scale','lucas-device-appendix','pain-scale','pediatric-vital-sign-ranges-by-age','epinephrine-1-100000-push-dose-appendix','total-body-surface-area','tcd-destinations'];
-     a=primary.map(id=>data.find(x=>x.id===id)).filter(Boolean);
+     a=primary.map(id=>data.find(x=>x.id===id)).filter(x=>x&&!(role==='EMT'&&isAlsOnly(x)));
    }
  }else{
-   a=data.filter(x=>(cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat))&&matchesSearch(x));
+   a=data.filter(x=>!(role==='EMT'&&isAlsOnly(x))&&(cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat))&&matchesSearch(x));
  }
  document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'<div class="empty">'+(q?'No protocols match “'+esc(q)+'”.<br><button class="back" style="margin-top:12px" onclick="clearSearch()">Clear Search</button>':'No protocols found in this section.')+'</div>'
 }
@@ -520,8 +523,10 @@ function burnProtocolTools(){
  </div>`;
 }
 function openP(id){
- let x=data.find(z=>z.id===id);if(!x)return;location.hash=id;document.querySelector('#list').classList.add('off');
- let body=(x.id==='controlled-substance-verification'?controlledSubstancePage21():(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x)+protocolDoseTools(x)),src=(x.id==='controlled-substance-verification'?'protocol-viewer.html?src='+encodeURIComponent('updates/published/current-protocol-book.pdf')+'&start=21&end=21&title='+encodeURIComponent('Controlled Substance Verification'):sourceHref(x)),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
+ let x=data.find(z=>z.id===id);if(!x)return;
+ if(role==='EMT'&&isAlsOnly(x)){leaveDetail();cat='All';tabs();render();return}
+ location.hash=id;document.querySelector('#list').classList.add('off');
+ let body=(x.id==='controlled-substance-verification'?controlledSubstancePage21():(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x)+protocolDoseTools(x)),src=(x.id==='controlled-substance-verification'?'protocol-viewer.html?src='+encodeURIComponent('updates/published/current-protocol-book.pdf')+'&start=21&end=21&title='+encodeURIComponent('Controlled Substance Verification'):sourceHref(x)),roleText=role==='EMT'?'EMT selected — showing BLS care only.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
  document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${src&&x.category!=='Appendix'?`<p><a class="source" href="${esc(src)}">View Source Protocol PDF ↗</a></p>`:''}<div class="notice">Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.</div><div class="protocol-body">${body}</div></div>`;
  document.querySelector('#detail').classList.add('on');
  if(x.id==='combined-burn')renderBurnMap();
