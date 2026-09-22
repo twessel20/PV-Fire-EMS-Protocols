@@ -232,8 +232,26 @@ async function loadPatientMedication(rxcui,fallbackName){
  }
  const brand=(label?.openfda?.brand_name||[]).join(', ');
  const generic=(label?.openfda?.generic_name||[]).join(', ');
- const classParts=[...(label?.openfda?.pharm_class_epc||[]),...(label?.openfda?.pharm_class_cs||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
- const drugClass=[...new Set(classParts)].join(' • ')||'Drug class information was not available from the matched FDA label.';
+ let classParts=[...(label?.openfda?.pharm_class_epc||[]),...(label?.openfda?.pharm_class_cs||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
+ if(!classParts.length){
+  try{
+   const cr=await fetch('https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui='+encodeURIComponent(rxcui)+'&relaSource=ATC');
+   if(cr.ok){
+    const cj=await cr.json();
+    classParts=(cj.rxclassDrugInfoList?.rxclassDrugInfo||[]).map(v=>v?.rxclassMinConceptItem?.className).filter(Boolean);
+   }
+  }catch(e){}
+ }
+ if(!classParts.length){
+  try{
+   const cr=await fetch('https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui='+encodeURIComponent(rxcui)+'&relaSource=MEDRT');
+   if(cr.ok){
+    const cj=await cr.json();
+    classParts=(cj.rxclassDrugInfoList?.rxclassDrugInfo||[]).map(v=>v?.rxclassMinConceptItem?.className).filter(Boolean);
+   }
+  }catch(e){}
+ }
+ const drugClass=[...new Set(classParts)].join(' • ')||'Drug class information was not available for this medication.';
  const moaParts=[...(label?.openfda?.pharm_class_moa||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
  const mechanism=patientMedTrim(label?.mechanism_of_action||(moaParts.length?moaParts.join(' • '):'Mechanism of action was not available from the matched FDA label.'),700);
  const indication=patientMedTrim(label?.indications_and_usage||label?.purpose||'Indication information was not available from the matched FDA label.',800);
