@@ -54,6 +54,9 @@ body{background:#f4f7fa}
 
 /* v55 scoring and triage tools */
 .score-grid{display:grid;gap:12px;margin-top:12px}.score-field{display:block;padding:10px;background:#f8fafc;border:1px solid #dbe4ee;border-radius:10px}.score-field b{display:block;color:#173a5e;font-size:14px}.score-field .tool-input{margin-top:6px}.score-total{font-size:22px;text-align:center;color:#173a5e;margin-top:14px}.triage-box{margin-top:14px;padding:12px;background:#f8fafc;border:1px solid #dbe4ee;border-radius:12px}.triage-box h4{margin:0 0 10px;color:#173a5e}.triage-actions{display:grid;gap:8px}.triage-actions .tool-btn{margin-top:0}.triage-result{display:grid;gap:6px;text-align:center;padding:12px}.triage-result b{font-size:22px;color:#173a5e}.triage-result span{color:#475569;line-height:1.4}
+
+/* v56 protocol-linked field tools */
+.protocol-tools{margin:14px 0;background:#f8fafc;border:1px solid #dbe4ee;border-radius:12px;padding:12px}.protocol-tool-btn{width:100%;display:grid;grid-template-columns:28px 1fr 18px;align-items:center;gap:8px;text-align:left;background:#fff;border:1px solid #dbe4ee;border-radius:9px;padding:10px 11px;margin:6px 0;color:#173a5e}.protocol-tool-btn b{font-size:14px}.protocol-tool-btn .tool-chevron{font-size:22px;color:#64748b}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -687,12 +690,24 @@ function burnProtocolTools(){
    </div>
  </div>`;
 }
+function protocolToolLinks(x){
+ const tools=[];
+ if(['childbirth','neonatal-resuscitation'].includes(x.id))tools.push(['👶','APGAR Score','apgar']);
+ if(['combined-general-medical','combined-general-trauma','patient-destination-criteria','combined-head-injury'].includes(x.id))tools.push(['🧠','Glasgow Coma Scale','gcs']);
+ if(['combined-general-medical','combined-general-trauma'].includes(x.id))tools.push(['🚑','START Triage','start']);
+ if(!tools.length)return '';
+ return '<div class="protocol-tools"><div class="related-title">Field Tools</div>'+tools.map(t=>'<button class="protocol-tool-btn" onclick="openProtocolTool(\''+t[2]+'\')"><span>'+t[0]+'</span><b>'+t[1]+'</b><span class="tool-chevron">›</span></button>').join('')+'</div>';
+}
+function openProtocolTool(which){
+ const detail=document.querySelector('#detail'),list=document.querySelector('#list');
+ detail.classList.remove('on');list.classList.remove('off');location.hash='';cat='Tools';quickSet=null;tabs();renderTools();openToolCard(which);scrollTo(0,0);
+}
 function openP(id){
  let x=data.find(z=>z.id===id);if(!x)return;
  if(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications')){leaveDetail();cat='All';tabs();render();return}
  location.hash=id;document.querySelector('#list').classList.add('off');
  let body=(x.id==='controlled-substance-verification'?controlledSubstancePage21():(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x)+protocolDoseTools(x)),src=(x.id==='controlled-substance-verification'?'protocol-viewer.html?src='+encodeURIComponent('updates/published/current-protocol-book.pdf')+'&start=21&end=21&title='+encodeURIComponent('Controlled Substance Verification'):sourceHref(x)),roleText=role==='EMT'?'EMT selected — showing BLS care only.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
- document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${src&&x.category!=='Appendix'&&role!=='EMT'?`<p><a class="source" href="${esc(src)}">View Source Protocol PDF ↗</a></p>`:''}${x.category==='Appendix'?'':'<div class="notice">'+(role==='EMT'?'BLS-only quick-reference view. Higher-scope treatment content is hidden.':'Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.')+'</div>'}<div style="display:none">${role==='EMT'?'BLS-only quick-reference view. Higher-scope treatment content is hidden.':'Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.'}</div><div class="protocol-body">${body}</div></div>`;
+ document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${protocolToolLinks(x)}${src&&x.category!=='Appendix'&&role!=='EMT'?`<p><a class="source" href="${esc(src)}">View Source Protocol PDF ↗</a></p>`:''}${x.category==='Appendix'?'':'<div class="notice">'+(role==='EMT'?'BLS-only quick-reference view. Higher-scope treatment content is hidden.':'Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.')+'</div>'}<div style="display:none">${role==='EMT'?'BLS-only quick-reference view. Higher-scope treatment content is hidden.':'Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.'}</div><div class="protocol-body">${body}</div></div>`;
  document.querySelector('#detail').classList.add('on');
  if(x.id==='combined-burn')renderBurnMap();
  scrollTo(0,0);
