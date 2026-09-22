@@ -435,11 +435,43 @@ function formatProtocol(x){
  }
  return rendered.join('');
 }
+function burnProtocolTools(){
+ return `<div class="tool-card" style="margin:14px 0">
+   <h3>Burn TBSA — Interactive Body Map</h3>
+   <div class="tool-note">Tap each burned body region on the front/back anatomy map. Tap again to remove it. The running TBSA total updates automatically.</div>
+   <div class="burn-age">
+     <button id="burnAdult" class="on" onclick="setBurnAge('adult')">Adult</button>
+     <button id="burnChild" onclick="setBurnAge('child')">Child</button>
+     <button id="burnInfant" onclick="setBurnAge('infant')">Infant</button>
+   </div>
+   <div id="burnMap" class="burn-map"></div>
+   <div class="tbsa-sticky"><span>Estimated TBSA</span><b id="burnTotal">0%</b></div>
+   <button class="tool-btn" style="background:#475569" onclick="resetBurn()">Clear Burn Map</button>
+   <div class="tool-result">
+     <div class="tool-note">For small/scattered areas, the patient's palm including fingers is approximately 1% TBSA. Use the official protocol/source when exact burn classification or destination criteria are needed.</div>
+   </div>
+   <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:14px">
+     <h3 style="font-size:17px">Parkland Burn Volume Calculator</h3>
+     <div class="tool-note">Uses the TBSA selected on the body map above. Enter patient weight to estimate the first-24-hour crystalloid volume.</div>
+     <input id="burnWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
+     <select id="burnWeightUnit" class="tool-input">
+       <option value="lb">lb</option>
+       <option value="kg">kg</option>
+     </select>
+     <button class="tool-btn" onclick="calcParkland()">Calculate Burn Fluid Volume</button>
+     <div id="parklandResult" class="tool-result" style="display:none"></div>
+     <div class="tool-note" style="margin-top:10px"><b>Formula used:</b> Adult 4 mL × kg × %TBSA; pediatric 3 mL × kg × %TBSA. Half is allocated to the first 8 hours from the time of burn and half over the next 16 hours. This tool calculates volume only.</div>
+     <div class="tool-note" style="margin-top:10px"><b>PVFIRE fluid:</b> Volume is displayed for Normal Saline, the crystalloid carried by PVFIRE. Follow Medical Control / receiving burn center direction for ongoing resuscitation.</div>
+   </div>
+ </div>`;
+}
 function openP(id){
  let x=data.find(z=>z.id===id);if(!x)return;location.hash=id;document.querySelector('#list').classList.add('off');
- let body=(x.category==='Medications'?'':protocolDoseTools(x))+formatProtocol(x),src=sourceHref(x),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
+ let body=(x.category==='Medications'?'':protocolDoseTools(x))+(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x),src=sourceHref(x),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
  document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${src?`<p><a class="source" href="${esc(src)}" target="_blank" rel="noopener">View Source Protocol PDF ↗</a></p>`:''}<div class="notice">Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.</div><div class="protocol-body">${body}</div></div>`;
- document.querySelector('#detail').classList.add('on');scrollTo(0,0);
+ document.querySelector('#detail').classList.add('on');
+ if(x.id==='combined-burn')renderBurnMap();
+ scrollTo(0,0);
 }
 function closeP(){location.hash='';document.querySelector('#detail').classList.remove('on');document.querySelector('#list').classList.remove('off')}
 document.querySelector('#q').addEventListener('input',()=>{if(document.querySelector('#detail').classList.contains('on'))closeP();if(document.querySelector('#q').value.trim()&&cat!=='All'){cat='All';tabs()}render()});document.querySelector('#q').addEventListener('search',()=>{if(!document.querySelector('#q').value)render()});
