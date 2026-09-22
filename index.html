@@ -129,7 +129,7 @@ function renderTools(){
     <div class="tools-grid tool-menu">
       <button class="tool-launch" onclick="openToolCard('lido')"><span class="tool-launch-icon">💉</span><span><b>Lidocaine Dose</b><small>Adult cardiac arrest dose calculator</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('dopamine')"><span class="tool-launch-icon">IV</span><span><b>Dopamine Gravity Drip</b><small>Calculate gravity tubing gtt/min</small></span><span class="tool-chevron">›</span></button>
-      <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn TBSA & Parkland Calculator</b><small>Rule of Nines TBSA + Parkland burn fluid volume</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn Calculator — TBSA + Parkland</b><small>One tool: burn map, TBSA calculation, and Parkland fluid formula</small></span><span class="tool-chevron">›</span></button>
     </div>
     <div id="toolDetail"></div>`;
 }
@@ -157,7 +157,7 @@ function openToolCard(which){
    <button class="tool-btn" onclick="calcDopamine()">Calculate gtt/min</button><div id="dopResult" class="tool-result" style="display:none"></div>
    <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose × weight kg × drop factor) ÷ concentration (mcg/mL).</div></div>`;
  if(which==='burn'){host.innerHTML=back+`
-   <div class="tool-card"><h3>Burn TBSA & Parkland Calculator</h3>
+   <div class="tool-card"><h3>Burn Calculator — TBSA + Parkland</h3>
    <div class="tool-note">Estimate total body surface area using the Rule of Nines, then use that TBSA directly in the Parkland burn-volume calculation below.</div>
    <div class="burn-age"><button id="burnAdult" class="on" onclick="setBurnAge('adult')">Adult</button><button id="burnChild" onclick="setBurnAge('child')">Child</button><button id="burnInfant" onclick="setBurnAge('infant')">Infant</button></div>
    <div id="burnMap" class="burn-map"></div><div class="tbsa-sticky"><span>Estimated TBSA</span><b id="burnTotal">0%</b></div>
