@@ -443,6 +443,28 @@ function calcProtocolDose(pid,key){
  out.innerHTML=kg.toFixed(1)+' kg × '+c.perKg+' '+c.unit+'/kg<br><strong>'+dose.toFixed(dose<10?2:1)+' '+c.unit+'</strong><div class="dose-note">'+note+'</div>';
 }
 
+function controlledSubstancePage21(){
+ const rows=[
+ ['p','The purpose of this section is to provide the guidelines for inventory of supply and record keeping procedures for the administration of all scheduled narcotic drugs. The appropriate security procedures for these drugs shall also be described.'],
+ ['b','The following drugs shall be considered scheduled narcotic drugs requiring strict accountability:'],
+ ['s','Versed'],['s','Fentanyl'],
+ ['b','Controlled Substance Verification will occur at each shift change.'],
+ ['s','On-coming paramedic (or Senior EMT if Medic Unit is BLS for the shift) will verify that the red tag on the outside of the Med Vault is present, intact, and the tag number matches the previous red tag number in the Daily Drug Log.'],
+ ['ss','If there is an issue, refer to the Controlled Substance Verification Procedure.'],
+ ['s','The on-coming paramedic (or Senior EMT if Medic Unit is BLS for the shift) will then sign their name and radio number in the Daily Drug Log.'],
+ ['b','The drugs listed above shall be kept in the following manner:'],
+ ['s','Limited quantities shall be maintained in a sealed lock box stored in a locking cabinet within the patient compartment of the ambulance. Minimum quantities carried in the ambulance:'],
+ ['ss','2 vials of Versed'],['ss','2 vials of Fentanyl'],
+ ['b','Narcotic drug administration shall be documented in ESO. These records shall be completed at the time of the call in the ePCR.'],
+ ['s','Enter administration in the “Flow Chart” tab, including amount given, route, old tag number, and new tag number.'],
+ ['s','If multiple doses are given, enter the tag numbers for each dose rather than entering only the total dose once.'],
+ ['s','Document the physician giving the order if the administration was not a standing order.'],
+ ['s','In “Signatures” → “Controlled Substances” → “Witness to Waste Signature,” enter the medication, amount given, personnel witness name, and signature.'],
+ ['s','HOSPITAL STAFF MUST WITNESS DISPOSAL. All unused portions shall be wasted at the hospital prior to clearing. Record the amount wasted and have the nurse or physician identified by first name, last name, and title sign as witness.'],
+ ['s','Back at the ambulance, recount/reseal the Narc Box with the new card on the outside and the old card on the inside.']
+ ];
+ return '<div class="section">NARCOTIC ACCOUNTABILITY — PAGE 21</div>'+rows.map(r=>'<div class="line '+(r[0]==='b'?'bullet':r[0]==='s'?'subbullet':r[0]==='ss'?'subsub':'para')+'">'+esc(r[1])+'</div>').join('');
+}
 function formatProtocol(x){
  if(x.id==='controlled-substance-verification'||x.id==='narcotic-accountability'){
    const raw=(x.lines||[]).map(normText).filter(Boolean).filter(l=>l.toUpperCase()!=='PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS').filter(l=>!/^NARCOTIC ACCOUNTABILITY$/i.test(l)).filter(l=>!/^CONTROLLED SUBSTANCE VERIFICATION$/i.test(l));
@@ -499,7 +521,7 @@ function burnProtocolTools(){
 }
 function openP(id){
  let x=data.find(z=>z.id===id);if(!x)return;location.hash=id;document.querySelector('#list').classList.add('off');
- let body=(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x)+protocolDoseTools(x),src=sourceHref(x),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
+ let body=(x.id==='controlled-substance-verification'?controlledSubstancePage21():(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x)+protocolDoseTools(x)),src=(x.id==='controlled-substance-verification'?'protocol-viewer.html?src='+encodeURIComponent('updates/published/current-protocol-book.pdf')+'&start=21&end=21&title='+encodeURIComponent('Controlled Substance Verification'):sourceHref(x)),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
  document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${src?`<p><a class="source" href="${esc(src)}" target="_blank" rel="noopener">View Source Protocol PDF ↗</a></p>`:''}<div class="notice">Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.</div><div class="protocol-body">${body}</div></div>`;
  document.querySelector('#detail').classList.add('on');
  if(x.id==='combined-burn')renderBurnMap();
