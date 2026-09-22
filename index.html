@@ -207,7 +207,13 @@ async function lookupPatientMedication(){
 }
 function patientMedPlainSummary(name,classes,label){
  const hay=[name,(classes||[]).join(' '),(label?.openfda?.generic_name||[]).join(' '),(label?.openfda?.brand_name||[]).join(' ')].join(' ').toLowerCase();
- const has=(...xs)=>xs.some(x=>hay.includes(x));
+ const words=hay.replace(/[^a-z0-9]+/g,' ').trim().split(/\s+/).filter(Boolean);
+ const has=(...xs)=>xs.some(x=>{
+   const q=String(x).toLowerCase().trim();
+   if(!q)return false;
+   if(/[ -]/.test(q))return hay.includes(q);
+   return words.includes(q);
+ });
 
  const rules=[
   {m:['warfarin','coumadin','apixaban','eliquis','rivaroxaban','xarelto','dabigatran','pradaxa','edoxaban','savaysa','anticoagulant','factor xa inhibitor','vitamin k antagonist','direct thrombin inhibitor'],v:['Blood thinner','Helps prevent harmful blood clots from forming.','Used to prevent or treat blood clots and to lower stroke risk in some heart-rhythm patients.','Anticoagulant']},
@@ -236,7 +242,8 @@ function patientMedPlainSummary(name,classes,label){
   {m:['digoxin','cardiac glycoside'],v:['Heart medicine','Can slow the heart rate and help the heart pump more strongly.','Used in some patients with atrial fibrillation or heart failure.','Cardiac glycoside']},
   {m:['amiodarone','sotalol','flecainide','propafenone','antiarrhythmic'],v:['Heart-rhythm medicine','Helps control abnormal electrical activity in the heart.','Used for certain abnormal heart rhythms.','Antiarrhythmic']},
   {m:['amoxicillin','augmentin','azithromycin','zithromax','doxycycline','cephalexin','keflex','ciprofloxacin','clindamycin','antibiotic','antibacterial'],v:['Antibiotic','Kills bacteria or stops them from growing.','Used to treat bacterial infections.','Antibiotic']},
-  {m:['hydrocodone','oxycodone','morphine','fentanyl','tramadol','opioid','opiate'],v:['Opioid pain medicine','Changes how the brain and nervous system feel pain.','Used for moderate to severe pain.','Opioid analgesic']},
+  {m:['aspirin','acetylsalicylic acid','asa'],v:['Pain reliever / blood thinner','Reduces pain and fever and also makes platelets less sticky.','Used for pain or fever and, in some patients, to reduce the risk of heart attack or stroke.','NSAID / antiplatelet']},
+  {m:['hydrocodone','oxycodone','morphine','fentanyl','tramadol','codeine','hydromorphone','dilaudid','oxymorphone','methadone','buprenorphine'],v:['Opioid pain medicine','Changes how the brain and nervous system feel pain.','Used for moderate to severe pain.','Opioid analgesic']},
   {m:['ibuprofen','naproxen','meloxicam','celecoxib','nsaid','nonsteroidal anti-inflammatory'],v:['Pain / inflammation medicine','Reduces pain and inflammation.','Used for pain, arthritis, inflammation, or fever.','NSAID']},
   {m:['acetaminophen','tylenol'],v:['Pain / fever medicine','Helps reduce pain and fever.','Used for pain or fever.','Non-opioid analgesic / antipyretic']},
   {m:['diphenhydramine','benadryl','cetirizine','zyrtec','loratadine','claritin','fexofenadine','allegra','antihistamine'],v:['Allergy medicine','Blocks histamine, which causes many allergy symptoms.','Used for allergies, itching, or hives.','Antihistamine']},
