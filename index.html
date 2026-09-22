@@ -69,6 +69,7 @@ body{background:#f4f7fa}
 
 /* TCD v62 quick-reference display */
 .tcd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 16px}.tcd-card{background:#fff;border:1px solid #d8e3ec;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0000000d}.tcd-card h3{margin:0 0 8px;color:#173a5e;font-size:15px;display:flex;align-items:center;gap:7px}.tcd-hospital{padding:7px 0;border-top:1px solid #edf2f6;color:#1f2937;font-size:14px}.tcd-hospital:first-of-type{border-top:0}
+.tcd-official{background:#fff;border:1px solid #d8e3ec;border-radius:12px;padding:6px;margin:10px 0;overflow:auto}.tcd-page-canvas{display:block;width:100%;height:auto;background:#fff}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -650,6 +651,16 @@ function formatDnrProtocol(x){
  }
  return html;
 }
+
+async function renderTcdOfficialPage(){
+ const host=document.getElementById('tcdOfficialPage');if(!host)return;
+ try{
+  if(!window.pdfjsLib){await new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';sc.onload=resolve;sc.onerror=reject;document.head.appendChild(sc)})}
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf=await pdfjsLib.getDocument('updates/published/current-protocol-book.pdf').promise,page=await pdf.getPage(160),base=page.getViewport({scale:1}),width=Math.min(host.clientWidth||760,900),viewport=page.getViewport({scale:width/base.width}),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+  canvas.width=Math.floor(viewport.width);canvas.height=Math.floor(viewport.height);canvas.className='tcd-page-canvas';host.innerHTML='';host.appendChild(canvas);await page.render({canvasContext:ctx,viewport}).promise;
+ }catch(e){host.innerHTML='<div class="notice"><b>Official page preview could not load.</b> Use “Open Official TCD Page Full Screen” below.</div>'}
+}
 function formatTcdQuickReference(x){
  const groups=[
   ['🚑','Trauma Centers',['Liberty Hospital','Centerpoint','Belton Regional Medical Center','KU Medical Center','Children\'s Mercy Hospital','North Kansas City Hospital','Research Medical Center','Truman Medical Center Hospital Hill']],
@@ -659,7 +670,7 @@ function formatTcdQuickReference(x){
   ['🔥','Burn Centers',['KU Medical Center','Children\'s Mercy Hospital']],
   ['🫀','LVAD Destinations',['North Kansas City Hospital','Liberty Hospital']]
  ];
- return '<div class="reference-source"><div class="section">TCD DESTINATIONS — QUICK REFERENCE</div><div class="notice">Quick display transcribed from the official PVFIRE TCD Destinations page. Verify the official page below when needed.</div><div class="tcd-grid">'+groups.map(g=>'<div class="tcd-card"><h3><span>'+g[0]+'</span>'+esc(g[1])+'</h3>'+g[2].map(h=>'<div class="tcd-hospital">'+esc(h)+'</div>').join('')+'</div>').join('')+'</div>'+formatAppendixPage(x)+'</div>';
+ return '<div class="reference-source"><div class="section">TCD DESTINATIONS — QUICK REFERENCE</div><div class="notice">Quick display transcribed from the official PVFIRE TCD Destinations page.</div><div class="tcd-grid">'+groups.map(g=>'<div class="tcd-card"><h3><span>'+g[0]+'</span>'+esc(g[1])+'</h3>'+g[2].map(h=>'<div class="tcd-hospital">'+esc(h)+'</div>').join('')+'</div>').join('')+'</div><div class="section">OFFICIAL TCD PAGE 160</div><div id="tcdOfficialPage" class="tcd-official"><div class="tool-note">Loading official protocol page 160…</div></div><div class="appendix-actions"><a class="source" href="'+esc(sourceHref(x))+'">Open Official TCD Page Full Screen ↗</a></div></div>';
 }
 function formatAppendixPage(x){
  const src=x.sourceFile||x.pageUrl||'updates/published/current-protocol-book.pdf';
@@ -763,6 +774,7 @@ function openP(id){
  document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${protocolToolLinks(x)}${src&&x.category!=='Appendix'&&role!=='EMT'?`<p><a class="source" href="${esc(src)}">View Source Protocol PDF ↗</a></p>`:''}${x.category==='Appendix'?'':'<div class="notice">'+(role==='EMT'?'BLS-only quick-reference view. Higher-scope treatment content is hidden.':'Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.')+'</div>'}<div style="display:none">${role==='EMT'?'BLS-only quick-reference view. Higher-scope treatment content is hidden.':'Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.'}</div><div class="protocol-body">${body}</div></div>`;
  document.querySelector('#detail').classList.add('on');
  if(x.id==='combined-burn')renderBurnMap();
+ if(x.id==='tcd-destinations')renderTcdOfficialPage();
  scrollTo(0,0);
 }
 function closeP(){location.hash='';document.querySelector('#detail').classList.remove('on');document.querySelector('#list').classList.remove('off')}
