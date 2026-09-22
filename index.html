@@ -194,18 +194,35 @@ function renderPatientMeds(){
   </div>`;
  const i=document.querySelector('#patientMedQ');if(i){i.focus();i.addEventListener('keydown',e=>{if(e.key==='Enter')lookupPatientMedication()})}
 }
-function showPatientMedPillCount(){
- const host=document.getElementById('patientMedResult');
- host.innerHTML=`
-  <div class="tool-card"><h3>🔢 Pill Count</h3>
-   <div class="tool-note">Use when a prescription bottle is available and you need a quick estimate of how many pills may be missing.</div>
+function pillCountFormHtml(){
+ return `
+   <div class="tool-note">Enter the prescription directions and the current bottle count. The app will estimate how many pills should be left if the medication was taken exactly as prescribed.</div>
    <div class="calc-field"><label for="pcQty">Quantity originally dispensed</label><input id="pcQty" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 30"></div>
    <div class="calc-field"><label for="pcRemain">Pills currently in bottle</label><input id="pcRemain" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 12"></div>
-   <div class="calc-field"><label for="pcExpected">Expected doses already taken (optional)</label><input id="pcExpected" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 8"></div>
-   <button class="tool-btn" onclick="calcPillCount()">Calculate</button>
+   <div class="calc-field"><label for="pcPerDose">Pills per dose</label><input id="pcPerDose" class="tool-input" inputmode="decimal" type="number" min="0.25" step="0.25" value="1" placeholder="Example: 1 or 2"></div>
+   <div class="calc-field"><label for="pcFreqType">Prescription frequency</label><select id="pcFreqType" class="tool-input" onchange="pillCountFrequencyUI()"><option value="perday">Times per day</option><option value="hours">Every X hours</option></select></div>
+   <div id="pcPerDayWrap" class="calc-field"><label for="pcPerDay">Doses per day</label><input id="pcPerDay" class="tool-input" inputmode="decimal" type="number" min="0.25" step="0.25" value="1" placeholder="Example: 1, 2, 3"></div>
+   <div id="pcHoursWrap" class="calc-field" style="display:none"><label for="pcHours">Dose every how many hours?</label><input id="pcHours" class="tool-input" inputmode="decimal" type="number" min="1" step="1" placeholder="Example: 6, 8, 12"></div>
+   <div class="calc-field"><label for="pcStart">Prescription start / first-dose date and time</label><input id="pcStart" class="tool-input" type="datetime-local"><small>Use the first-dose time when known. If only the fill date is known, the result is an estimate.</small></div>
+   <div class="calc-field"><label for="pcAsOf">Count date and time</label><input id="pcAsOf" class="tool-input" type="datetime-local"></div>
+   <button class="tool-btn" onclick="calcPillCount()">Calculate expected count</button>
    <div id="pcResult" class="tool-result" style="display:none"></div>
-   <div class="patient-med-warning" style="margin-top:10px"><b>Important:</b> This is only an estimate. Refill timing, PRN use, pill organizers, missed doses, and pills stored elsewhere can change the expected count.</div>
-  </div>`;
+   <div class="patient-med-warning" style="margin-top:10px"><b>Important:</b> This is an estimate, not proof of ingestion. PRN directions, refill timing, missed doses, pill organizers, lost pills, early/late doses, and pills stored elsewhere can change the expected count.</div>`;
+}
+function initPillCountDates(){
+ const now=new Date(),pad=n=>String(n).padStart(2,'0'),fmt=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+ const asof=document.getElementById('pcAsOf');if(asof&&!asof.value)asof.value=fmt(now);
+}
+function pillCountFrequencyUI(){
+ const mode=document.getElementById('pcFreqType')?.value;
+ const a=document.getElementById('pcPerDayWrap'),b=document.getElementById('pcHoursWrap');
+ if(a)a.style.display=mode==='perday'?'block':'none';
+ if(b)b.style.display=mode==='hours'?'block':'none';
+}
+function showPatientMedPillCount(){
+ const host=document.getElementById('patientMedResult');
+ host.innerHTML='<div class="tool-card"><h3>🔢 Pill Count</h3>'+pillCountFormHtml()+'</div>';
+ initPillCountDates();
  host.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function showPatientMedPillId(){
@@ -386,16 +403,8 @@ function openToolCard(which){
  const host=document.querySelector('#toolDetail');
  document.querySelector('.tool-menu').style.display='none';
  const back='<button class="back tool-back" onclick="toolBack()">‹ Back to Tools</button>';
- if(which==='pillcount')host.innerHTML=back+`
-   <div class="tool-card"><h3>Pill Count</h3>
-   <div class="tool-note">Use this when a prescription bottle is available and you need a quick estimate of how many tablets/capsules may be missing.</div>
-   <div class="calc-field"><label for="pcQty">Quantity originally dispensed</label><input id="pcQty" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 30"></div>
-   <div class="calc-field"><label for="pcRemain">Pills currently in bottle</label><input id="pcRemain" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 12"></div>
-   <div class="calc-field"><label for="pcExpected">Expected doses already taken (optional)</label><input id="pcExpected" class="tool-input" inputmode="numeric" type="number" min="0" step="1" placeholder="Example: 8"></div>
-   <button class="tool-btn" onclick="calcPillCount()">Calculate</button>
-   <div id="pcResult" class="tool-result" style="display:none"></div>
-   <div class="patient-med-warning" style="margin-top:10px"><b>Important:</b> A pill count is only an estimate. Prescription dates, refill timing, PRN use, pill organizers, shared storage, early/late doses, and pills kept elsewhere can change the expected count.</div></div>`;
- if(which==='pillid')host.innerHTML=back+`
+ if(which==='pillcount'){host.innerHTML=back+'<div class="tool-card"><h3>🔢 Pill Count</h3>'+pillCountFormHtml()+'</div>';initPillCountDates()}
+  if(which==='pillid')host.innerHTML=back+`
    <div class="tool-card"><h3>Pill Identifier</h3>
    <div class="tool-note">Start with the exact imprint stamped on the tablet/capsule. Add color and shape only to narrow the results. The imprint is the most useful identifier.</div>
    <div class="calc-field"><label for="pillImprint">Imprint</label><input id="pillImprint" class="tool-input" autocomplete="off" placeholder="Example: L484 or M 367"></div>
@@ -464,15 +473,48 @@ function openToolCard(which){
    </div></div>`;renderBurnMap();}
 }
 function calcPillCount(){
- const out=document.getElementById('pcResult'),qty=Number(document.getElementById('pcQty')?.value),remain=Number(document.getElementById('pcRemain')?.value),expRaw=document.getElementById('pcExpected')?.value,expected=expRaw===''?null:Number(expRaw);
- if(!Number.isFinite(qty)||!Number.isFinite(remain)||qty<0||remain<0){out.style.display='block';out.innerHTML='<b>Enter valid bottle and remaining pill counts.</b>';return}
- const missing=Math.max(0,qty-remain);
- let html='<b>Pills not in bottle: '+missing+'</b>';
- if(expected!==null&&Number.isFinite(expected)&&expected>=0){
-   const unexplained=Math.max(0,missing-expected);
-   html+='<br>Expected already taken: '+expected+'<br><strong>Unaccounted for: '+unexplained+'</strong>';
+ const out=document.getElementById('pcResult');
+ const qty=Number(document.getElementById('pcQty')?.value);
+ const remain=Number(document.getElementById('pcRemain')?.value);
+ const perDose=Number(document.getElementById('pcPerDose')?.value);
+ const mode=document.getElementById('pcFreqType')?.value||'perday';
+ const perDay=Number(document.getElementById('pcPerDay')?.value);
+ const everyHours=Number(document.getElementById('pcHours')?.value);
+ const startRaw=document.getElementById('pcStart')?.value;
+ const asOfRaw=document.getElementById('pcAsOf')?.value;
+ if(!Number.isFinite(qty)||qty<0||!Number.isFinite(remain)||remain<0||!Number.isFinite(perDose)||perDose<=0){
+  out.style.display='block';out.innerHTML='<b>Enter valid quantity, remaining count, and pills per dose.</b>';return;
  }
- out.style.display='block';out.innerHTML=html;
+ if(!startRaw||!asOfRaw){out.style.display='block';out.innerHTML='<b>Enter the prescription start/first-dose time and the count time.</b>';return}
+ const start=new Date(startRaw),asOf=new Date(asOfRaw);
+ if(!Number.isFinite(start.getTime())||!Number.isFinite(asOf.getTime())||asOf<start){out.style.display='block';out.innerHTML='<b>Check the start and count dates/times.</b>';return}
+ let intervalHours;
+ if(mode==='hours'){
+   if(!Number.isFinite(everyHours)||everyHours<=0){out.style.display='block';out.innerHTML='<b>Enter a valid hourly interval.</b>';return}
+   intervalHours=everyHours;
+ }else{
+   if(!Number.isFinite(perDay)||perDay<=0){out.style.display='block';out.innerHTML='<b>Enter valid doses per day.</b>';return}
+   intervalHours=24/perDay;
+ }
+ const elapsedHours=(asOf-start)/3600000;
+ const dosesDue=Math.floor(elapsedHours/intervalHours)+1;
+ const expectedTaken=Math.min(qty,dosesDue*perDose);
+ const expectedRemain=Math.max(0,qty-expectedTaken);
+ const difference=remain-expectedRemain;
+ const pillsOut=Math.max(0,qty-remain);
+ let status='';
+ if(Math.abs(difference)<0.01)status='<strong>Count matches the expected amount.</strong>';
+ else if(difference<0)status='<strong style="color:#991b1b">'+Math.abs(difference).toFixed(Number.isInteger(Math.abs(difference))?0:2)+' pill(s) fewer than expected.</strong>';
+ else status='<strong>'+difference.toFixed(Number.isInteger(difference)?0:2)+' pill(s) more than expected.</strong>';
+ const freqText=mode==='hours'?'every '+everyHours+' hr':perDay+' time(s) per day';
+ out.style.display='block';
+ out.innerHTML='<div><b>Prescription:</b> '+perDose+' pill(s) per dose, '+freqText+'</div>'
+   +'<div style="margin-top:8px"><b>Scheduled doses due:</b> '+dosesDue+'</div>'
+   +'<div><b>Expected pills taken:</b> '+expectedTaken.toFixed(Number.isInteger(expectedTaken)?0:2)+'</div>'
+   +'<div><b>Expected pills remaining:</b> '+expectedRemain.toFixed(Number.isInteger(expectedRemain)?0:2)+'</div>'
+   +'<div><b>Actual pills remaining:</b> '+remain+'</div>'
+   +'<div><b>Total pills out of bottle:</b> '+pillsOut+'</div>'
+   +'<div style="margin-top:10px">'+status+'</div>';
 }
 function openPillIdentifier(){
  const imprint=(document.getElementById('pillImprint')?.value||'').trim();
