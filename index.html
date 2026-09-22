@@ -129,8 +129,7 @@ function renderTools(){
     <div class="tools-grid tool-menu">
       <button class="tool-launch" onclick="openToolCard('lido')"><span class="tool-launch-icon">💉</span><span><b>Lidocaine Dose</b><small>Adult cardiac arrest dose calculator</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('dopamine')"><span class="tool-launch-icon">IV</span><span><b>Dopamine Gravity Drip</b><small>Calculate gravity tubing gtt/min</small></span><span class="tool-chevron">›</span></button>
-      <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn TBSA</b><small>Rule of Nines interactive body map</small></span><span class="tool-chevron">›</span></button>
-      <button class="tool-launch" onclick="openToolCard('parkland')"><span class="tool-launch-icon">💧</span><span><b>Parkland Burn Volume</b><small>Burn fluid volume calculator</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn TBSA & Parkland Calculator</b><small>Rule of Nines TBSA + Parkland burn fluid volume</small></span><span class="tool-chevron">›</span></button>
     </div>
     <div id="toolDetail"></div>`;
 }
@@ -158,22 +157,22 @@ function openToolCard(which){
    <button class="tool-btn" onclick="calcDopamine()">Calculate gtt/min</button><div id="dopResult" class="tool-result" style="display:none"></div>
    <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose × weight kg × drop factor) ÷ concentration (mcg/mL).</div></div>`;
  if(which==='burn'){host.innerHTML=back+`
-   <div class="tool-card"><h3>Burn TBSA — Rule of Nines</h3>
-   <div class="tool-note">Tap burned regions on the generic front/back anatomy map. Choose the age group first; pediatric proportions are adjusted.</div>
+   <div class="tool-card"><h3>Burn TBSA & Parkland Calculator</h3>
+   <div class="tool-note">Estimate total body surface area using the Rule of Nines, then use that TBSA directly in the Parkland burn-volume calculation below.</div>
    <div class="burn-age"><button id="burnAdult" class="on" onclick="setBurnAge('adult')">Adult</button><button id="burnChild" onclick="setBurnAge('child')">Child</button><button id="burnInfant" onclick="setBurnAge('infant')">Infant</button></div>
    <div id="burnMap" class="burn-map"></div><div class="tbsa-sticky"><span>Estimated TBSA</span><b id="burnTotal">0%</b></div>
    <button class="tool-btn" style="background:#475569" onclick="resetBurn()">Clear Burn Map</button>
-   <div class="tool-result"><div class="tool-note">Tap a body surface again to remove it.</div><div class="burn-mini">For small/scattered areas, the patient's palm including fingers is approximately 1% TBSA. Use the official protocol/source when exact burn classification or destination criteria are needed.</div></div></div>`;renderBurnMap();}
- if(which==='parkland')host.innerHTML=back+`
-   <div class="tool-card"><h3>Parkland Burn Volume</h3>
-   <div class="tool-note">Enter the estimated TBSA and patient weight to estimate total crystalloid volume for the first 24 hours.</div>
-   <input id="burnTBSAInput" class="tool-input" inputmode="decimal" type="number" min="0" max="100" step="0.1" placeholder="Estimated TBSA %">
-   <input id="burnWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
-   <select id="burnWeightUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select>
-   <button class="tool-btn" onclick="burnTBSA=parseFloat(document.querySelector('#burnTBSAInput').value)||0;calcParkland()">Calculate Burn Fluid Volume</button>
-   <div id="parklandResult" class="tool-result" style="display:none"></div>
-   <div class="tool-note" style="margin-top:10px"><b>Formula used:</b> Adult 4 mL × kg × %TBSA; pediatric 3 mL × kg × %TBSA. Half is allocated to the first 8 hours from the time of burn and half over the next 16 hours. This tool calculates volume only.</div>
-   <div class="tool-note" style="margin-top:10px"><b>PVFIRE fluid:</b> Volume is displayed for Normal Saline, the crystalloid carried by PVFIRE. Follow Medical Control / receiving burn center direction for ongoing resuscitation.</div></div>`;
+   <div class="tool-result"><div class="tool-note">Tap a body surface again to remove it.</div><div class="burn-mini">For small/scattered areas, the patient's palm including fingers is approximately 1% TBSA. Use the official protocol/source when exact burn classification or destination criteria are needed.</div></div>
+   <div style="margin-top:16px;border-top:1px solid #dbe4ee;padding-top:14px">
+    <h3 style="font-size:17px">Parkland Burn Volume</h3>
+    <div class="tool-note">The selected TBSA above is used automatically. Enter patient weight to estimate total crystalloid volume for the first 24 hours.</div>
+    <input id="burnWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
+    <select id="burnWeightUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select>
+    <button class="tool-btn" onclick="calcParkland()">Calculate Burn Fluid Volume</button>
+    <div id="parklandResult" class="tool-result" style="display:none"></div>
+    <div class="tool-note" style="margin-top:10px"><b>Formula used:</b> Adult 4 mL × kg × %TBSA; pediatric 3 mL × kg × %TBSA. Half is allocated to the first 8 hours from the time of burn and half over the next 16 hours. This tool calculates volume only.</div>
+    <div class="tool-note" style="margin-top:10px"><b>PVFIRE fluid:</b> Volume is displayed for Normal Saline, the crystalloid carried by PVFIRE. Follow Medical Control / receiving burn center direction for ongoing resuscitation.</div>
+   </div></div>`;renderBurnMap();}
 }
 function calcLido(){
   const input=document.querySelector('#lidoWeight'),unit=document.querySelector('#lidoUnit'),box=document.querySelector('#lidoResult');
