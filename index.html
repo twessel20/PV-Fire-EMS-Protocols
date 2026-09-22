@@ -647,7 +647,32 @@ function formatDnrProtocol(x){
  }
  return html;
 }
+<style>
+.tcd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0}
+.tcd-card{background:#fff;border:1px solid #cbdbe8;border-radius:12px;padding:13px 14px;box-shadow:0 1px 2px #0000000d}
+.tcd-card h3{margin:0 0 8px;color:#173a5e;font-size:16px}
+.tcd-card div{padding:5px 0;border-top:1px solid #edf2f6;color:#26394b;font-weight:650;line-height:1.25}
+.tcd-card h3+div{border-top:0}
+@media(max-width:600px){.tcd-grid{grid-template-columns:1fr}.tcd-card{padding:12px}}
+</style>
+function formatTcdDestinations(x){
+ const viewer=sourceHref(x);
+ return '<div class="reference-source">'+
+   '<div class="section">TCD DESTINATIONS — QUICK REFERENCE</div>'+
+   '<div class="notice">Quick display transcribed from the official PVFIRE TCD Destinations appendix, page 160. Use the official page below to verify the source layout.</div>'+
+   '<div class="tcd-grid">'+
+    '<div class="tcd-card"><h3>🚑 Trauma Centers</h3><div>Liberty Hospital</div><div>Centerpoint</div><div>Belton Regional Medical Center</div><div>KU Medical Center</div><div>Children\'s Mercy Hospital</div><div>North Kansas City Hospital</div><div>Research Medical Center</div><div>Truman Medical Center Hospital Hill</div><div>Lee\'s Summit Medical Center</div></div>'+
+    '<div class="tcd-card"><h3>❤️ STEMI Centers</h3><div>Liberty Hospital</div><div>Centerpoint</div><div>KU Medical Center</div><div>North Kansas City Hospital</div><div>Research Medical Center</div><div>Lee\'s Summit Medical Center</div><div>St Lukes Plaza</div></div>'+
+    '<div class="tcd-card"><h3>🧠 Stroke — Primary</h3><div>Liberty Hospital</div><div>St Joseph Medical Center</div><div>St Lukes Plaza</div><div>Menorah Medical Center</div><div>St Lukes East</div><div>North Kansas City Hospital</div><div>St Lukes North</div><div>Olathe Medical Center</div><div>St Mary\'s Blue Springs</div><div>Overland Park Regional Medical Center</div><div>Centerpoint Medical Center</div><div>Providence Medical Center</div><div>Shawnee Mission Medical Center</div><div>St Lukes South</div></div>'+
+    '<div class="tcd-card"><h3>🧠 Stroke — Comprehensive</h3><div>KU Medical Center</div><div>Research Medical Center</div><div>St Lukes Plaza</div><div>Truman Medical Center Hospital Hill</div></div>'+
+    '<div class="tcd-card"><h3>🔥 Burn Centers</h3><div>KU Medical Center</div><div>Research Medical Center</div><div>Children\'s Mercy Hospital</div></div>'+
+    '<div class="tcd-card"><h3>🫀 LVAD Destinations</h3><div>North Kansas City</div><div>Liberty Hospital</div></div>'+
+   '</div>'+
+   '<div class="appendix-actions"><a class="source" href="'+esc(viewer)+'">Open Official TCD Page 160 ↗</a></div>'+
+ '</div>';
+}
 function formatAppendix(x){
+ if(x.id==='tcd-destinations')return formatTcdDestinations(x);
  const src=x.sourceFile||x.pageUrl||'updates/published/current-protocol-book.pdf';
  const pdf=src.split('#')[0],start=Number(x.page||((src.match(/#page=(\d+)/i)||[])[1])||1),end=Number(x.endPage||start);
  const range=end>start?'Pages '+start+'–'+end:'Page '+start;
