@@ -38,7 +38,9 @@ const appendixMap={
   'patient-destination-criteria':['tcd-destinations']
 };
 function relatedAppendices(x){
-  return (appendixMap[x.id]||[]).map(id=>data.find(z=>z.id===id)).filter(Boolean);
+  let ids=[...(appendixMap[x.id]||[])];
+  if((x.id.startsWith('pediatric-')||x.id==='neonatal-resuscitation')&&x.id!=='pediatric-vital-sign-ranges-by-age'&&!ids.includes('pediatric-vital-sign-ranges-by-age'))ids.push('pediatric-vital-sign-ranges-by-age');
+  return ids.map(id=>data.find(z=>z.id===id)).filter(Boolean);
 }
 function relatedAppendixHtml(x){
   let items=relatedAppendices(x);
