@@ -48,16 +48,32 @@ function renderTools(){
   document.querySelector('#list').innerHTML=`
     <div class="tools-grid">
       <div class="tool-card">
-        <h3>Lidocaine Dosing Calculator</h3>
-        <div class="tool-note">Weight-based medication calculator for PVFIRE use.</div>
-        <div class="tool-disabled">Not yet activated: the current 2026 PVFIRE protocol book does not contain a Lidocaine dosing protocol or formula. Official department dosing parameters are required before this calculator can safely calculate a dose.</div>
+        <h3>Lidocaine — Adult Cardiac Arrest</h3>
+        <div class="tool-note"><b>VF/pulseless VT:</b> PVFIRE calculator uses <b>1.0 mg/kg IV/IO</b> for the initial dose, with <b>no maximum dose cap</b>. Enter weight in pounds or kilograms.</div>
+        <input id="lidoWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
+        <select id="lidoUnit" class="tool-input">
+          <option value="lb">lb</option>
+          <option value="kg">kg</option>
+        </select>
+        <button class="tool-btn" onclick="calcLido()">Calculate Lidocaine Dose</button>
+        <div id="lidoResult" class="tool-result" style="display:none"></div>
+        <div class="tool-note" style="margin-top:10px">AHA-based cardiac arrest tool. The 2025 AHA adult cardiac arrest algorithm lists lidocaine 1–1.5 mg/kg IV/IO for the first dose; this calculator intentionally uses the department-selected 1.0 mg/kg value.</div>
       </div>
       <div class="tool-card">
         <h3>Dopamine Dosing Calculator</h3>
         <div class="tool-note">Weight-based infusion calculator for PVFIRE use.</div>
-        <div class="tool-disabled">Not yet activated: the current 2026 PVFIRE protocol book does not contain a Dopamine dosing protocol or infusion formula. Official department dosing parameters and concentration are required before this calculator can safely calculate a rate.</div>
+        <div class="tool-disabled">Not yet activated: official PVFIRE infusion range and bag concentration are still needed before this calculator can safely calculate a rate.</div>
       </div>
     </div>`;
+}
+function calcLido(){
+  const input=document.querySelector('#lidoWeight'),unit=document.querySelector('#lidoUnit'),box=document.querySelector('#lidoResult');
+  let w=parseFloat(input.value);
+  if(!Number.isFinite(w)||w<=0){box.style.display='block';box.innerHTML='<b>Enter a valid patient weight.</b>';return}
+  let kg=unit.value==='lb'?w/2.2046226218:w;
+  let dose=kg*1.0;
+  box.style.display='block';
+  box.innerHTML=`<div style="font-size:13px;color:#475569">Calculated weight</div><div style="font-size:18px;font-weight:800">${kg.toFixed(1)} kg</div><div style="margin-top:8px;font-size:13px;color:#475569">Lidocaine initial dose — 1.0 mg/kg IV/IO</div><div style="font-size:26px;font-weight:900;color:#991b1b">${dose.toFixed(1)} mg</div><div style="margin-top:6px;font-size:12px;color:#475569">No maximum dose cap applied.</div>`;
 }
 function render(){
  if(cat==='Tools'){renderTools();return}
