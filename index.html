@@ -252,9 +252,57 @@ function patientMedPlainSummary(name,classes,label){
   return {cls:'Nitrate / chest-pain medicine',moa:'Widens blood vessels, which lowers the heart’s workload and can improve blood flow.',use:'Commonly prescribed for angina/chest pain; some forms are used for heart failure.'};
  if(has('digoxin','cardiac glycoside'))
   return {cls:'Heart-rate / heart-strength medicine (digoxin)',moa:'Slows electrical conduction through the AV node and can increase the strength of heart contractions.',use:'Used in some patients with atrial fibrillation or heart failure.'};
+ const cls=(classes||[]).join(' ').toLowerCase();
+ if(/opioid|opiate/.test(cls)) return {cls:'Opioid pain medicine',moa:'Changes how the brain and nervous system feel and respond to pain.',use:patientMedPlainUse(label,'Often prescribed for moderate to severe pain.')};
+ if(/nonsteroidal anti-inflammatory|nsaid/.test(cls)) return {cls:'Pain / inflammation medicine (NSAID)',moa:'Reduces chemicals that cause pain and inflammation.',use:patientMedPlainUse(label,'Often used for pain, inflammation, fever, or arthritis.')};
+ if(/antihistamine/.test(cls)) return {cls:'Allergy medicine (antihistamine)',moa:'Blocks histamine, a chemical involved in allergic reactions.',use:patientMedPlainUse(label,'Commonly used for allergies, itching, or other allergic symptoms.')};
+ if(/antibiotic|antibacterial|penicillin|cephalosporin|macrolide|fluoroquinolone/.test(cls)) return {cls:'Antibiotic',moa:'Kills bacteria or stops them from growing.',use:patientMedPlainUse(label,'Prescribed to treat a bacterial infection.')};
+ if(/antipsychotic/.test(cls)) return {cls:'Antipsychotic / mood medicine',moa:'Changes the activity of certain brain chemicals.',use:patientMedPlainUse(label,'May be prescribed for schizophrenia, bipolar disorder, severe agitation, or other mental-health conditions.')};
+ if(/central nervous system stimulant|stimulant/.test(cls)) return {cls:'Stimulant',moa:'Increases activity in parts of the brain and nervous system.',use:patientMedPlainUse(label,'Often prescribed for ADHD or narcolepsy.')};
+ if(/muscle relaxant/.test(cls)) return {cls:'Muscle relaxer',moa:'Reduces muscle spasm or muscle overactivity.',use:patientMedPlainUse(label,'Often prescribed for painful muscle spasms or muscle tightness.')};
+ if(/alpha.*blocker|alpha-1.*antagonist/.test(cls)) return {cls:'Alpha blocker',moa:'Relaxes certain muscles and blood vessels.',use:patientMedPlainUse(label,'Often prescribed for an enlarged prostate or high blood pressure.')};
+ if(/phosphodiesterase.*5|pde.?5/.test(cls)) return {cls:'Erectile-dysfunction / blood-vessel medicine',moa:'Relaxes blood vessels and increases blood flow.',use:patientMedPlainUse(label,'Commonly prescribed for erectile dysfunction or pulmonary hypertension.')};
+ if(/glp-1|glucagon-like peptide/.test(cls)) return {cls:'Diabetes / weight-loss medicine (GLP-1)',moa:'Helps control blood sugar, slows stomach emptying, and can reduce appetite.',use:patientMedPlainUse(label,'Often prescribed for type 2 diabetes and, for some drugs, weight management.')};
+ if(/sglt.?2|sodium-glucose cotransporter/.test(cls)) return {cls:'Diabetes medicine (SGLT2 inhibitor)',moa:'Helps the kidneys remove extra sugar through the urine.',use:patientMedPlainUse(label,'Commonly prescribed for type 2 diabetes; some are also used for heart failure or kidney disease.')};
+ if(/dpp.?4|dipeptidyl peptidase/.test(cls)) return {cls:'Diabetes medicine (DPP-4 inhibitor)',moa:'Helps the body release insulin when blood sugar is high.',use:patientMedPlainUse(label,'Prescribed for type 2 diabetes.')};
+ if(/h2.*blocker|histamine h2/.test(cls)) return {cls:'Acid reducer (H2 blocker)',moa:'Reduces the amount of acid made by the stomach.',use:patientMedPlainUse(label,'Commonly used for heartburn, acid reflux, or ulcers.')};
+ if(/antiarrhythmic/.test(cls)) return {cls:'Heart-rhythm medicine',moa:'Changes electrical activity in the heart to help control abnormal rhythms.',use:patientMedPlainUse(label,'Prescribed for certain abnormal heart rhythms.')};
+ if(/antiemetic/.test(cls)) return {cls:'Nausea medicine (antiemetic)',moa:'Blocks signals that can trigger nausea and vomiting.',use:patientMedPlainUse(label,'Used to prevent or treat nausea and vomiting.')};
+ if(/anticholinergic/.test(cls)) return {cls:'Anticholinergic medicine',moa:'Blocks certain nerve signals in the body.',use:patientMedPlainUse(label,'Used for several conditions depending on the drug, such as bladder problems, breathing problems, or movement symptoms.')};
+ if(/leukotriene/.test(cls)) return {cls:'Asthma / allergy medicine',moa:'Blocks chemicals that contribute to airway swelling and allergy symptoms.',use:patientMedPlainUse(label,'Commonly prescribed for asthma or allergies.')};
+ if(/opioid antagonist/.test(cls)) return {cls:'Opioid blocker',moa:'Blocks the effects of opioid drugs.',use:patientMedPlainUse(label,'Used to reverse or block opioid effects.')};
  return null;
 }
+function patientMedPlainUse(label,fallback){
+ const raw=String((label?.indications_and_usage||label?.purpose||[])[0]||label?.indications_and_usage||label?.purpose||'').toLowerCase();
+ if(!raw)return fallback;
+ if(/hypertension|high blood pressure/.test(raw))return 'Commonly prescribed for high blood pressure.';
+ if(/heart failure|congestive heart failure/.test(raw))return 'Commonly prescribed for heart failure.';
+ if(/atrial fibrillation|afib|a-fib/.test(raw))return 'Commonly prescribed for atrial fibrillation or to reduce stroke risk.';
+ if(/diabetes|glycemic|blood glucose/.test(raw))return 'Prescribed to help control diabetes and high blood sugar.';
+ if(/depression|depressive/.test(raw))return 'Commonly prescribed for depression.';
+ if(/anxiety|panic disorder/.test(raw))return 'Commonly prescribed for anxiety or panic disorder.';
+ if(/seizure|epilep/.test(raw))return 'Prescribed to prevent or control seizures.';
+ if(/neuropath|nerve pain/.test(raw))return 'Often prescribed for nerve pain.';
+ if(/pain|analges/.test(raw))return 'Used to treat pain.';
+ if(/infection|bacterial/.test(raw))return 'Prescribed to treat a bacterial infection.';
+ if(/gastroesophageal|gerd|acid reflux|heartburn/.test(raw))return 'Used for acid reflux, heartburn, or related stomach-acid problems.';
+ if(/asthma/.test(raw)&&/copd|chronic obstructive/.test(raw))return 'Used to help control asthma or COPD symptoms.';
+ if(/asthma/.test(raw))return 'Used to prevent or treat asthma symptoms.';
+ if(/copd|chronic obstructive/.test(raw))return 'Used to help control COPD symptoms.';
+ if(/hyperlipid|cholesterol/.test(raw))return 'Prescribed to lower cholesterol and reduce cardiovascular risk.';
+ if(/benign prostatic|bph|enlarged prostate/.test(raw))return 'Commonly prescribed for an enlarged prostate and urinary symptoms.';
+ if(/erectile dysfunction/.test(raw))return 'Commonly prescribed for erectile dysfunction.';
+ if(/osteoporosis/.test(raw))return 'Prescribed to strengthen bones and reduce fracture risk from osteoporosis.';
+ if(/nausea|vomit/.test(raw))return 'Used to prevent or treat nausea and vomiting.';
+ if(/allerg|rhinitis|urticaria/.test(raw))return 'Used for allergies or allergic symptoms.';
+ return fallback;
+}
 function patientMedFallbackUse(label){
+ const raw=String((label?.indications_and_usage||label?.purpose||[])[0]||label?.indications_and_usage||label?.purpose||'').toLowerCase();
+ if(!raw)return 'Common use information was not available for this medication.';
+ return patientMedPlainUse(label,'See the detailed drug reference for its common uses.');
+}
  const raw=patientMedTrim(label?.indications_and_usage||label?.purpose||'',500);
  if(!raw)return 'Common use information was not available for this medication.';
  const first=raw.split(/(?<=[.!?])\s+/)[0];
