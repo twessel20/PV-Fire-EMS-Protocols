@@ -318,15 +318,17 @@ function tokenize(x){
 }
 function scopedTokens(x){
  let ts=tokenize(x),scope='shared',result=[];
- const majorHeading=u=>/^(ASSESSMENT|INTERVENTIONS|NOTES|SCENE SIZE UP|BODY SUBSTANCE ISOLATION|LOCALIZED COLD INJURY|SYSTEMIC HYPOTHERMIA|PROBABLE PSYCHIATRIC PROBLEM ONLY|AGITATED PATIENTS|MILD ANAPHYLAXIS|ANAPHYLAXIS WITH RESPIRATORY DISTRESS|ANAPHYLACTIC SHOCK)\b/.test(u);
+ const sharedRx=/\bBLS\s+(?:OR|OF)\s+ALS\b/i;
+ const alsRx=/\bALS\s+ONLY\b|\bALSO\s+ONLY\b/i;
+ const resetHeading=u=>/^(ASSESSMENT|INTERVENTIONS|NOTES|SCENE SIZE UP|BODY SUBSTANCE ISOLATION|LOCALIZED COLD INJURY|SYSTEMIC HYPOTHERMIA|PROBABLE PSYCHIATRIC PROBLEM ONLY|AGITATED PATIENTS|MILD ANAPHYLAXIS|ANAPHYLAXIS WITH RESPIRATORY DISTRESS|ANAPHYLACTIC SHOCK)\b/.test(u);
  for(let i=0;i<ts.length;i++){
    let t=ts[i],u=normText(t.text).toUpperCase();
-   const sharedMarker=/\bBLS\s+(?:OR|OF)\s+ALS\b/.test(u);
-   const alsMarker=/\bALS\s+ONLY\b|\bALSO\s+ONLY\b/.test(u);
+   const sharedMarker=sharedRx.test(t.text),alsMarker=alsRx.test(t.text);
    if(t.heading){
-     if(sharedMarker||majorHeading(u))scope='shared';
+     if(resetHeading(u)||sharedMarker)scope='shared';
      if(alsMarker)scope='als';
-     result.push({...t,scope:alsMarker?'als':'shared',text:t.text.replace(/\s*\(?BLS\s+(?:or|of)\s+ALS\)?\s*/ig,' ').trim()});
+     let txt=t.text.replace(/\s*\(?BLS\s+(?:or|of)\s+ALS\)?\s*/ig,' ').trim();
+     result.push({...t,text:txt,scope});
      continue;
    }
    if(sharedMarker){
