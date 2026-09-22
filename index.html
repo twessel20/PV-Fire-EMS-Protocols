@@ -244,8 +244,8 @@ function sourceHref(x){
  const src=x.sourceFile||x.pageUrl||'';
  const m=src.match(/#page=(\d+)/i);
  if(m){
-   const pdf=new URL(src.split('#')[0],location.href).href;
-   return pdf+'#page='+encodeURIComponent(m[1]);
+   const start=Number(x.page||m[1]),end=Number(x.endPage||start);
+   return 'protocol-viewer.html?src='+encodeURIComponent(src.split('#')[0])+'&start='+start+'&end='+end+'&title='+encodeURIComponent(displayTitle(x));
  }
  return src;
 }
