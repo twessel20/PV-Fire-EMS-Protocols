@@ -11,6 +11,21 @@ body{background:#f4f7fa}
 .quick-primary{border-left:4px solid #2f6690}
 .section{background:#2f6690}.source,.dose-btn{background:#2f6690;border-bottom-color:#173a5e}
 .rolebtn.on{background:#dceaf4;color:#173a5e}.status{background:#244b6b}
+
+/* v45 blue-theme contrast correction — visual only */
+.top,.top .brand,.top .sub,.top .status{color:#fff}
+.top .sub{color:#dbeafe}
+.top .homebtn,.top .rolebtn,.top .clearsearch{color:#fff}
+.top .rolebtn.on{background:#fff;color:#173a5e}
+.tabs .tab{color:#173a5e}.tabs .tab.on{background:#2f6690;color:#fff}
+.section{background:#2f6690;color:#fff}
+.section *, .source,.dose-btn{color:#fff}
+.home-hero h2,.quick-card b{color:#173a5e}
+.card .title{color:#1f2937}.card .meta{color:#64748b}
+.notice{color:#374151}.related-box{color:#1f2937}
+.related-box a,.related-link{color:#245f8c}
+.protocol-mode.bls,.protocol-mode.als{color:#173a5e}
+.back{color:#173a5e}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
