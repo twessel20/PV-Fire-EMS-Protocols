@@ -1,18 +1,109 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#991b1b"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><title>PVFIRE EMS Protocols</title><style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f4f4f5}*{box-sizing:border-box}body{margin:0}.top{position:sticky;top:0;z-index:5;background:#991b1b;color:white;padding:calc(12px + env(safe-area-inset-top)) 16px 12px}.headrow{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:10px;object-fit:cover;background:white}.brand{font-weight:850;font-size:20px}.sub{font-size:12px;opacity:.9}.status{margin-left:auto;font-size:11px;background:#ffffff22;padding:6px 8px;border-radius:999px}.search{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;font-size:16px}.tabs{display:flex;gap:7px;overflow:auto;padding:10px 12px;background:white;border-bottom:1px solid #ddd}.tab{white-space:nowrap;border:0;border-radius:999px;padding:8px 12px;background:#eee}.tab.on{background:#991b1b;color:#fff}.wrap{padding:12px;max-width:800px;margin:auto}.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px #0001}.title{font-weight:750;font-size:17px}.meta{font-size:12px;color:#666;margin-top:4px}.detail{display:none}.detail.on{display:block}.list{display:block}.list.off{display:none}.back{border:0;background:#eee;border-radius:9px;padding:9px 12px;margin-bottom:10px}.source{display:inline-block;text-decoration:none;background:#991b1b;color:#fff;border-radius:10px;padding:10px 12px;margin:8px 0 14px}.section{font-weight:800;margin:18px 0 7px;color:#7f1d1d}.line{font-size:15px;line-height:1.42;margin:5px 0}.bullet{padding-left:16px;position:relative}.bullet:before{content:'•';position:absolute;left:2px}.notice{font-size:12px;background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:10px;margin-bottom:12px}.fav{float:right;border:0;background:none;font-size:22px}.empty{text-align:center;color:#666;padding:30px}.flag{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 7px;margin:2px 4px 2px 0}.bls{background:#e5e7eb}.als{background:#dcfce7;color:#166534}.mc{background:#fee2e2;color:#991b1b}.footer{color:#777;font-size:11px;text-align:center;padding:24px 12px 90px}.offline{display:none;background:#fff3cd;color:#664d03;padding:7px 12px;text-align:center;font-size:12px}.offline.on{display:block}</style></head><body>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f4f4f5}*{box-sizing:border-box}body{margin:0}.top{position:sticky;top:0;z-index:5;background:#991b1b;color:white;padding:calc(12px + env(safe-area-inset-top)) 16px 12px}.headrow{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:10px;object-fit:cover;background:white}.brand{font-weight:850;font-size:20px}.sub{font-size:12px;opacity:.9}.status{margin-left:auto;font-size:11px;background:#ffffff22;padding:6px 8px;border-radius:999px}.rolebar{display:flex;gap:8px;margin-top:10px}.rolebtn{flex:1;border:1px solid #ffffff55;background:#ffffff18;color:#fff;border-radius:10px;padding:9px 10px;font-weight:800;font-size:14px}.rolebtn.on{background:white;color:#991b1b}.search{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;font-size:16px}.tabs{display:flex;gap:7px;overflow:auto;padding:10px 12px;background:white;border-bottom:1px solid #ddd}.tab{white-space:nowrap;border:0;border-radius:999px;padding:8px 12px;background:#eee}.tab.on{background:#991b1b;color:#fff}.wrap{padding:12px;max-width:800px;margin:auto}.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px #0001}.title{font-weight:750;font-size:17px}.meta{font-size:12px;color:#666;margin-top:4px}.detail{display:none}.detail.on{display:block}.list{display:block}.list.off{display:none}.back{border:0;background:#eee;border-radius:9px;padding:9px 12px;margin-bottom:10px}.source{display:inline-block;text-decoration:none;background:#991b1b;color:#fff;border-radius:10px;padding:10px 12px;margin:8px 0 14px}.section{font-weight:850;margin:22px 0 9px;color:#7f1d1d;font-size:15px;letter-spacing:.02em}.line{font-size:16px;line-height:1.48;margin:9px 0}.para{margin:12px 0}.bullet{padding-left:23px;position:relative}.bullet:before{content:'•';position:absolute;left:5px;font-weight:800}.subbullet{padding-left:40px;position:relative}.subbullet:before{content:'◦';position:absolute;left:18px;font-weight:900}.subsub{padding-left:56px;position:relative}.subsub:before{content:'▪';position:absolute;left:34px}.scope{display:inline-block;font-size:10px;font-weight:850;border-radius:999px;padding:3px 7px;margin-left:6px;vertical-align:2px}.scope.shared{background:#e5e7eb;color:#333}.scope.als{background:#dcfce7;color:#166534}.role-note{font-size:12px;background:#eef6ff;border:1px solid #bfdbfe;padding:10px;border-radius:10px;margin:10px 0 14px}.notice{font-size:12px;background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:10px;margin-bottom:12px}.fav{float:right;border:0;background:none;font-size:22px}.empty{text-align:center;color:#666;padding:30px}.flag{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 7px;margin:2px 4px 2px 0}.bls{background:#e5e7eb}.als{background:#dcfce7;color:#166534}.mc{background:#fee2e2;color:#991b1b}.footer{color:#777;font-size:11px;text-align:center;padding:24px 12px 90px}.offline{display:none;background:#fff3cd;color:#664d03;padding:7px 12px;text-align:center;font-size:12px}.offline.on{display:block}</style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
-<div class="top"><div class="headrow"><div class="logo" style="display:grid;place-items:center;font-weight:900;color:#991b1b">PV</div><div><div class="brand">PVFIRE EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><input id="q" class="search" placeholder="Search protocols, medications, symptoms…"></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
-let data=[],cat='All';const cats=['All','Favorites','Medical','Trauma','Procedures','Medications','Guidelines','Appendix'];let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));
+<div class="top"><div class="headrow"><div class="logo" style="display:grid;place-items:center;font-weight:900;color:#991b1b">PV</div><div><div class="brand">PVFIRE EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><input id="q" class="search" placeholder="Search protocols, medications, symptoms…"></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
+let data=[],cat='All';const cats=['All','Favorites','Medical','Trauma','Procedures','Medications','Guidelines','Appendix'];let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function tabs(){document.querySelector('#tabs').innerHTML=cats.map(c=>`<button class="tab ${c===cat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
 function setCat(c){cat=c;tabs();render()}
+function setRole(r){role=r;localStorage.setItem('pvfdRole',r);document.querySelector('#emtBtn').classList.toggle('on',r==='EMT');document.querySelector('#medicBtn').classList.toggle('on',r==='PARAMEDIC');if(document.querySelector('#detail').classList.contains('on')&&location.hash)openP(location.hash.slice(1));else render()}
+function roleUI(){document.querySelector('#emtBtn').classList.toggle('on',role==='EMT');document.querySelector('#medicBtn').classList.toggle('on',role==='PARAMEDIC')}
 function status(){let on=navigator.onLine;document.querySelector('#net').textContent=on?'Online':'Offline';document.querySelector('#offline').classList.toggle('on',!on)}addEventListener('online',status);addEventListener('offline',status);status();
 function flags(x){let t=(x.lines||[]).join(' ').toUpperCase(),a=[];if(t.includes('BLS OR ALS'))a.push('<span class="flag bls">BLS OR ALS</span>');if(t.includes('ALS ONLY'))a.push('<span class="flag als">ALS ONLY</span>');if(t.includes('MEDICAL CONTROL'))a.push('<span class="flag mc">MEDICAL CONTROL</span>');return a.join('')}
-function render(){let q=document.querySelector('#q').value.toLowerCase().trim();let a=data.filter(x=>(cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat))&&(!q||String(x.search||'').includes(q)||(x.aliases||[]).some(z=>String(z).toLowerCase().includes(q))));document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div><div>${flags(x)}</div></div>`).join(''):'<div class="empty">No matching protocol found.</div>'}
+function displayTitle(x){if(/^Combined\s+/i.test(x.title))return x.title.replace(/^Combined\s+/i,'')+(role==='EMT'?' — EMT/BLS Workflow':' — Paramedic/ALS Workflow');return x.title}
+function render(){let q=document.querySelector('#q').value.toLowerCase().trim();let a=data.filter(x=>(cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat))&&(!q||String(x.search||'').includes(q)||(x.aliases||[]).some(z=>String(z).toLowerCase().includes(q))));document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${role==='EMT'?'EMT/BLS':'Paramedic/ALS'} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div><div>${flags(x)}</div></div>`).join(''):'<div class="empty">No matching protocol found.</div>'}
 function toggleFav(id){fav.has(id)?fav.delete(id):fav.add(id);localStorage.setItem('pvfdFav',JSON.stringify([...fav]));render()}
 function sourceHref(x){if(x.sourceFile)return x.sourceFile;return x.pageUrl||''}
-function openP(id){let x=data.find(z=>z.id===id);if(!x)return;location.hash=id;document.querySelector('#list').classList.add('off');let body=(x.lines||[]).map(l=>{let u=String(l).toUpperCase();let sec=/^(ASSESSMENT|INTERVENTIONS|INDICATIONS|CONTRAINDICATIONS|PRECAUTIONS|SIDE EFFECTS|DOSE|DOSES|ROUTE|ROUTES|NOTES|TECHNIQUE|COMPLICATIONS|PROTOCOL USED IN|PROTOCOLS USED IN|PHARMACOLOGY|GENERAL ROUTING|STEMI ROUTING|TRAUMA)/.test(u);return sec?`<div class="section">${esc(l)}</div>`:`<div class="line ${/^[-•▪o]|^[0-9]+\./.test(l)?'bullet':''}">${esc(String(l).replace(/^[-•▪]\s*/,''))}</div>`}).join('');let src=sourceHref(x);document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(x.title)}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div>${flags(x)}</div>${src?`<p><a class="source" href="${esc(src)}" target="_blank" rel="noopener">View Source Protocol PDF ↗</a></p>`:''}<div class="notice">Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.</div>${body}</div>`;document.querySelector('#detail').classList.add('on');scrollTo(0,0)}
+function normText(v){return String(v||'').replace(/\s+/g,' ').trim()}
+function sameTitle(a,b){return normText(a).toLowerCase().replace(/[^a-z0-9]+/g,'')===normText(b).toLowerCase().replace(/[^a-z0-9]+/g,'')}
+function isHeading(t){
+ let u=t.toUpperCase();
+ if(/^(ASSESSMENT|INTERVENTIONS|INDICATIONS|CONTRAINDICATIONS|PRECAUTIONS|SIDE EFFECTS|DOSE|DOSES|ROUTE|ROUTES|NOTES|TECHNIQUE|COMPLICATIONS|PROTOCOL USED IN|PROTOCOLS USED IN|PHARMACOLOGY|GENERAL ROUTING|STEMI ROUTING|TRAUMA|GUIDELINES|DOCUMENTATION)\s*:?/.test(u))return true;
+ if(t.endsWith(':')&&t.length<70)return true;
+ return t.length<60&&/^[A-Z0-9 ()/&.,'\-]+$/.test(t)&&/[A-Z]/.test(t);
+}
+function tokenize(x){
+ let raw=(x.lines||[]).map(normText).filter(Boolean).filter(l=>l.toUpperCase()!=='PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS'&&!sameTitle(l,x.title));
+ let out=[];
+ for(let i=0;i<raw.length;i++){
+   let l=raw[i];
+   if(/^[•▪]$/.test(l)&&raw[i+1]){out.push({level:l==='▪'?2:0,text:normText(raw[++i])});continue}
+   if(/^o\s+/i.test(l)){out.push({level:1,text:normText(l.replace(/^o\s+/i,''))});continue}
+   if(/^[-•]\s+/.test(l)){out.push({level:0,text:normText(l.replace(/^[-•]\s+/,''))});continue}
+   if(/^▪\s+/.test(l)){out.push({level:2,text:normText(l.replace(/^▪\s+/,''))});continue}
+   if(/^\d+\.\s+/.test(l)){out.push({level:0,text:l,numbered:true});continue}
+   if(isHeading(l)){out.push({heading:true,text:l.replace(/:$/,'')});continue}
+   out.push({text:l,plain:true});
+ }
+ // Join wrapped PDF lines to their preceding logical item.
+ let joined=[];
+ for(let i=0;i<out.length;i++){
+   let t=out[i];
+   if(t.heading){joined.push(t);continue}
+   if(t.plain){
+     if(joined.length&& !joined.at(-1).heading && (joined.at(-1).plain||joined.at(-1).level!==undefined)){joined.at(-1).text=normText(joined.at(-1).text+' '+t.text)}
+     else joined.push(t);
+   } else {
+     joined.push(t);
+   }
+ }
+ return joined;
+}
+function scopedTokens(x){
+ let ts=tokenize(x),scope='shared',result=[];
+ for(let i=0;i<ts.length;i++){
+   let t=ts[i],u=t.text.toUpperCase();
+   if(t.heading){
+     // clinical subsection heading resets to shared context unless explicitly ALS-only
+     if(!/ALS\s*ONLY/.test(u))scope='shared';
+     result.push({...t,scope:'shared'});continue;
+   }
+   let inlineALS=/\(ALS ONLY\)|^ALS\s*ONLY\b|\bALS\s*ONLY:/.test(u);
+   let inlineShared=/^BLS\s+OR\s+ALS\b|\(BLS\s+OR\s+ALS\)/.test(u);
+   if(inlineShared){scope='shared';let txt=t.text.replace(/^BLS\s+or\s+ALS\s*:?\s*/i,'').trim();if(txt)result.push({...t,text:txt,scope:'shared'});continue}
+   if(inlineALS){
+     let txt=t.text.replace(/^ALS\s*ONLY\s*:?\s*/i,'').replace(/\s*\(ALS ONLY\)\s*/ig,'').trim();
+     if(txt)result.push({...t,text:txt,scope:'als'});
+     // standalone ALS ONLY marker turns following nested items into ALS until next top-level shared item/heading
+     if(/^ALS\s*ONLY\s*:?$/i.test(t.text)||/^ALS\s*ONLY\s*:/i.test(t.text)&&!txt)scope='als';
+     else if(/^ALS\s*ONLY\s*:?$/i.test(u))scope='als';
+     continue;
+   }
+   if(scope==='als' && t.level===0){
+     // A new top-level bullet after nested ALS items resumes shared workflow unless it itself says ALS.
+     scope='shared';
+   }
+   result.push({...t,scope});
+ }
+ return result;
+}
+function formatProtocol(x){
+ let ts=scopedTokens(x);
+ if(role==='EMT')ts=ts.filter(t=>t.heading||t.scope!=='als');
+ let rendered=[],lastHeading='';
+ for(let i=0;i<ts.length;i++){
+   let t=ts[i],text=normText(t.text);
+   if(!text)continue;
+   if(t.heading){
+     lastHeading=text.toUpperCase();
+     rendered.push(`<div class="section">${esc(text)}</div>`);
+     continue;
+   }
+   // Medication blocks are lists even when the PDF has no bullets.
+   if(x.category==='Medications'&&/^(INDICATIONS|CONTRAINDICATIONS|PRECAUTIONS|SIDE EFFECTS)$/.test(lastHeading)&&t.plain)t.level=0;
+   let cls=t.level===2?'subsub':t.level===1?'subbullet':t.level===0?'bullet':'para';
+   let badge=role==='PARAMEDIC'?(t.scope==='als'?'<span class="scope als">ALS ONLY</span>':(t.level!==undefined?'<span class="scope shared">BLS/ALS</span>':'')):'';
+   rendered.push(`<div class="line ${cls}">${esc(text)}${badge}</div>`);
+ }
+ return rendered.join('');
+}
+function openP(id){
+ let x=data.find(z=>z.id===id);if(!x)return;location.hash=id;document.querySelector('#list').classList.add('off');
+ let body=formatProtocol(x),src=sourceHref(x),roleText=role==='EMT'?'EMT / BLS workflow — ALS-only actions are hidden':'Paramedic / ALS workflow — shared and ALS-only actions are shown';
+ document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="role-note"><b>${esc(roleText)}</b><br>Use the role selector at the top to switch workflows.</div>${src?`<p><a class="source" href="${esc(src)}" target="_blank" rel="noopener">View Source Protocol PDF ↗</a></p>`:''}<div class="notice">Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.</div><div class="protocol-body">${body}</div></div>`;
+ document.querySelector('#detail').classList.add('on');scrollTo(0,0);
+}
 function closeP(){location.hash='';document.querySelector('#detail').classList.remove('on');document.querySelector('#list').classList.remove('off')}
 document.querySelector('#q').addEventListener('input',()=>{if(document.querySelector('#detail').classList.contains('on'))closeP();render()});
 async function load(){try{let r=await fetch('protocols.json',{cache:'no-store'});if(!r.ok)throw 0;data=await r.json()}catch(e){let r=await caches.match('protocols.json');if(r)data=await r.json()}tabs();render();let dates=data.map(x=>x.updated).filter(Boolean).sort();document.querySelector('#ver').textContent=`${dates.length?'Current through '+dates.at(-1):'2026'} • Offline-ready`;if(location.hash)openP(location.hash.slice(1))}load();if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
