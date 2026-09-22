@@ -207,30 +207,36 @@ async function lookupPatientMedication(){
 }
 async function loadPatientMedication(rxcui,fallbackName){
  const host=document.querySelector('#patientMedResult');host.innerHTML='<div class="patient-med-card"><b>Loading medication summary…</b></div>';
- let props=null,label=null;
+ let props=null,label=null,ingredientName='';
  try{const p=await fetch('https://rxnav.nlm.nih.gov/REST/rxcui/'+encodeURIComponent(rxcui)+'/properties.json');if(p.ok)props=(await p.json()).properties||null}catch(e){}
- try{const l=await fetch('https://api.fda.gov/drug/label.json?search=openfda.rxcui:%22'+encodeURIComponent(rxcui)+'%22&limit=1');if(l.ok)label=(await l.json()).results?.[0]||null}catch(e){}
  const name=props?.name||fallbackName||'Medication';
+ async function getLabel(search){
+  try{const r=await fetch('https://api.fda.gov/drug/label.json?search='+encodeURIComponent(search)+'&limit=1');if(r.ok)return (await r.json()).results?.[0]||null}catch(e){}
+  return null;
+ }
+ // An RxNorm search can return an ingredient-level concept (for example, losartan).
+ // openFDA labels are usually product-level, so use progressively broader label matching.
+ label=await getLabel('openfda.rxcui:"'+rxcui+'"');
+ if(!label)label=await getLabel('openfda.generic_name:"'+name+'"');
+ if(!label)label=await getLabel('openfda.substance_name:"'+name+'"');
+ if(!label){
+  try{
+   const rel=await fetch('https://rxnav.nlm.nih.gov/REST/rxcui/'+encodeURIComponent(rxcui)+'/related.json?tty=IN+PIN');
+   if(rel.ok){
+    const groups=(await rel.json()).relatedGroup?.conceptGroup||[];
+    const ing=groups.flatMap(g=>g.conceptProperties||[]).find(v=>v?.name);
+    ingredientName=ing?.name||'';
+   }
+  }catch(e){}
+  if(ingredientName)label=await getLabel('openfda.substance_name:"'+ingredientName+'"');
+ }
  const brand=(label?.openfda?.brand_name||[]).join(', ');
  const generic=(label?.openfda?.generic_name||[]).join(', ');
- const classParts=[
-   ...(label?.openfda?.pharm_class_epc||[]),
-   ...(label?.openfda?.pharm_class_cs||[])
- ].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
- const drugClass=[...new Set(classParts)].join(' • ')||'Drug class was not available for this exact FDA label match.';
- const moaParts=[
-   ...(label?.openfda?.pharm_class_moa||[])
- ].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
- const mechanism=patientMedTrim(
-   label?.mechanism_of_action||
-   (moaParts.length?moaParts.join(' • '):'Mechanism of action was not available for this exact FDA label match.'),
-   700
- );
- const indication=patientMedTrim(
-   label?.indications_and_usage||label?.purpose||
-   'Indication information was not available for this exact FDA label match.',
-   800
- );
+ const classParts=[...(label?.openfda?.pharm_class_epc||[]),...(label?.openfda?.pharm_class_cs||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
+ const drugClass=[...new Set(classParts)].join(' • ')||'Drug class information was not available from the matched FDA label.';
+ const moaParts=[...(label?.openfda?.pharm_class_moa||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
+ const mechanism=patientMedTrim(label?.mechanism_of_action||(moaParts.length?moaParts.join(' • '):'Mechanism of action was not available from the matched FDA label.'),700);
+ const indication=patientMedTrim(label?.indications_and_usage||label?.purpose||'Indication information was not available from the matched FDA label.',800);
  const dailymed='https://dailymed.nlm.nih.gov/dailymed/search.cfm?query='+encodeURIComponent(name);
  const rxnav='https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm='+encodeURIComponent(rxcui);
  host.innerHTML='<div class="patient-med-card"><h3>'+esc(name)+'</h3>'
