@@ -243,7 +243,10 @@ function toggleFav(id){fav.has(id)?fav.delete(id):fav.add(id);localStorage.setIt
 function sourceHref(x){
  const src=x.sourceFile||x.pageUrl||'';
  const m=src.match(/#page=(\d+)/i);
- if(m)return 'protocol-viewer.html?src='+encodeURIComponent(src.split('#')[0])+'&page='+encodeURIComponent(m[1])+'&title='+encodeURIComponent(displayTitle(x));
+ if(m){
+   const pdf=new URL(src.split('#')[0],location.href).href;
+   return pdf+'#page='+encodeURIComponent(m[1]);
+ }
  return src;
 }
 function normText(v){return String(v||'').replace(/\s+/g,' ').trim()}
