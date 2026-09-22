@@ -708,9 +708,32 @@ function formatAppendixPage(x){
  '</div>';
 }
 function formatAppendix(x){if(x.id==='tcd-destinations')return formatTcdQuickReference(x);if(x.id==='pediatric-vital-sign-ranges-by-age')return pediatricVitalsCard()+formatAppendixPage(x);return formatAppendixPage(x)}
+function formatLucasProcedure(x){
+ const raw=(x.lines||[]).map(normText).filter(Boolean)
+  .filter(l=>!/^P$/i.test(l)&&!/^L$/i.test(l))
+  .filter(l=>!/^PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS$/i.test(l))
+  .filter(l=>!sameTitle(l,x.title));
+ const headingRx=/^(INDICATIONS|CONTRAINDICATIONS|PRECAUTIONS|TECHNIQUE|COMPLICATIONS)\s*:?$/i;
+ let html='',i=0;
+ while(i<raw.length){
+  let t=raw[i];
+  if(headingRx.test(t)){html+='<div class="section">'+esc(t.replace(/:$/,''))+'</div>';i++;continue}
+  const m=t.match(/^(\d+\.|[a-z]\.)\s*(.*)$/i);
+  if(!m){i++;continue}
+  const level=/^\d/.test(m[1])?0:1;
+  let text=m[2];
+  while(i+1<raw.length&&!headingRx.test(raw[i+1])&&!/^(\d+\.|[a-z]\.)\s+/i.test(raw[i+1])){
+   text=normText(text+' '+raw[++i]);
+  }
+  html+='<div class="line '+(level?'subbullet':'bullet')+'">'+esc(text)+'</div>';
+  i++;
+ }
+ return html;
+}
 function formatProtocol(x){
  if(x.category==='Appendix')return formatAppendix(x);
  if(x.id==='do-not-resuscitate')return formatDnrProtocol(x);
+ if(x.id==='lucas-device-procedure')return formatLucasProcedure(x);
  if(x.category==='Guidelines'&&x.id!=='controlled-substance-verification'&&x.id!=='narcotic-accountability')return formatGuidelineSource(x);
  if(x.id==='controlled-substance-verification'||x.id==='narcotic-accountability'){
    const raw=(x.lines||[]).map(normText).filter(Boolean).filter(l=>l.toUpperCase()!=='PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS').filter(l=>!/^NARCOTIC ACCOUNTABILITY$/i.test(l)).filter(l=>!/^CONTROLLED SUBSTANCE VERIFICATION$/i.test(l));
