@@ -544,7 +544,7 @@ const protocolDoseCalcs={
 'combined-hypoglycemia':[{key:'d10',label:'D10 — Pediatric',formula:'5 mL/kg IV/IO (max 125 mL)',unit:'mL',perKg:5,max:125}],
 'combined-hypotension-shock':[{key:'fluid20',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000},{key:'fluid10',label:'NS/LR',formula:'10 mL/kg (max 500 mL)',unit:'mL',perKg:10,max:500}],
 'combined-overdose-poisoning':[{key:'nal',label:'Naloxone — Pediatric IV',formula:'0.1 mg/kg IV (max 2 mg)',unit:'mg',perKg:.1,max:2},{key:'bic',label:'Sodium Bicarbonate',formula:'1 mEq/kg IV (max 50 mEq)',unit:'mEq',perKg:1,max:50},{key:'ca',label:'Calcium Chloride',formula:'0.2 mL/kg IV (max 10 mL)',unit:'mL',perKg:.2,max:10}],
-'combined-pain-control':[{key:'ket',label:'Ketorolac — Pediatric',formula:'0.5–1 mg/kg; max 15 mg IV / 30 mg IM',unit:'mg',perKg:.5,minPerKg:.5,maxPerKg:1,special:'ketRange'},{key:'fen',label:'Fentanyl — Pediatric',formula:'1 mcg/kg slow IV/IN (max 50 mcg)',unit:'mcg',perKg:1,max:50}],
+'combined-pain-control':[{key:'ket',label:'Ketorolac — Pediatric',formula:'0.5–1 mg/kg; max 15 mg IV / 30 mg IM',unit:'mg',perKg:.5,minPerKg:.5,maxPerKg:1,special:'ketRange'},{key:'fen',label:'Fentanyl — Pediatric',formula:'1 mcg/kg slow IV/IN; may repeat ×1',unit:'mcg',perKg:1,special:'fentanylRepeat'}],
 'combined-post-resuscitation':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg; may repeat ×1',unit:'mL',perKg:20},{key:'nal',label:'Pediatric 0.1 mg/kg dose',formula:'0.1 mg/kg (max 2 mg)',unit:'mg',perKg:.1,max:2}],
 'combined-seizure':[{key:'midin',label:'Midazolam — IN',formula:'0.2 mg/kg IN (max 5 mg)',unit:'mg',perKg:.2,max:5},{key:'midiv',label:'Midazolam — Pediatric IV',formula:'0.1 mg/kg slow IV (max 5 mg)',unit:'mg',perKg:.1,max:5}],
 'adult-bradycardia':[{key:'fluid',label:'NS/LR',formula:'10 mL/kg (max 500 mL)',unit:'mL',perKg:10,max:500}],
@@ -573,7 +573,7 @@ const medicationDoseCalcs={
 'd10':[{key:'d10',label:'Pediatric',formula:'5 mL/kg IV/IO (max 125 mL)',unit:'mL',perKg:5,max:125}],
 'epinephrine-1-1000':[{key:'epiIM',label:'Pediatric IM',formula:'0.01 mg/kg IM (max 0.3 mg)',unit:'mg',perKg:.01,max:.3},{key:'epiIV',label:'Pediatric IV/IO — as printed',formula:'0.02 mg/kg IV/IO (minimum 0.1 mg; max 1 mg)',unit:'mg',perKg:.02,min:.1,max:1}],
 'epinephrine-1-10-000':[{key:'epi',label:'Pediatric',formula:'0.01 mg/kg IV/IO every 3–5 min',unit:'mg',perKg:.01}],
-'fentanyl':[{key:'fen',label:'Pediatric',formula:'1 mcg/kg slow IV/IN',unit:'mcg',perKg:1}],
+'fentanyl':[{key:'fen',label:'Pediatric',formula:'1 mcg/kg slow IV/IN; may repeat ×1',unit:'mcg',perKg:1,special:'fentanylRepeat'}],
 'ketorolac-toradol':[{key:'ket',label:'Pediatric >10 years',formula:'0.5 mg/kg; max 15 mg IV / 30 mg IM/IN',unit:'mg',perKg:.5,special:'ketSingle'}],
 'narcan-naloxone':[{key:'nal',label:'Pediatric IV',formula:'0.1 mg/kg IV (max 2 mg)',unit:'mg',perKg:.1,max:2}],
 'sodium-bicarbonate':[{key:'bic',label:'Adult/Pediatric',formula:'1 mEq/kg (max total 50 mEq)',unit:'mEq',perKg:1,max:50}],
@@ -588,6 +588,7 @@ function calcProtocolDose(pid,key){
  const c=((protocolDoseCalcs[pid]||medicationDoseCalcs[pid])||[]).find(v=>v.key===key),id='dc-'+pid+'-'+key,out=document.getElementById(id+'-o'),w=parseFloat(document.getElementById(id+'-w').value),u=document.getElementById(id+'-u').value;
  if(!c||!Number.isFinite(w)||w<=0){out.innerHTML='<b>Enter a valid patient weight.</b>';return}
  const kg=u==='lb'?w/2.2046226218:w,raw=kg*c.perKg;let dose=raw;if(Number.isFinite(c.max))dose=Math.min(dose,c.max);if(Number.isFinite(c.min))dose=Math.max(dose,c.min);
+ if(c.special==='fentanylRepeat'){const first=kg*c.perKg,maxTotal=first*2,fmt=n=>n.toFixed(n<10?2:1);out.innerHTML=kg.toFixed(1)+' kg × '+c.perKg+' '+c.unit+'/kg<br><strong>FIRST DOSE: '+fmt(first)+' '+c.unit+'</strong><div class="dose-note" style="margin-top:10px"><strong>⚠ MAX DOSE: '+fmt(maxTotal)+' '+c.unit+' TOTAL</strong><br>May repeat the first dose ×1.</div>';return}
  if(c.special==='ket'||c.special==='ketRange'){const de=document.getElementById(id+'-d'),pk=Number(de?.value);if(!Number.isFinite(pk)||pk<c.minPerKg||pk>c.maxPerKg){out.innerHTML='<b>Enter an exact dose from '+c.minPerKg+'–'+c.maxPerKg+' '+c.unit+'/kg.</b>';return}const d=kg*pk;out.innerHTML=kg.toFixed(1)+' kg × '+pk+' mg/kg<br><strong>'+Math.min(d,15).toFixed(1)+' mg IV</strong><br><strong>'+Math.min(d,30).toFixed(1)+' mg IM</strong><div class="dose-note"><b>MAX: 15 mg IV • 30 mg IM</b></div>';return}if(c.special==='ketSingle'){const d=kg*.5;out.innerHTML=kg.toFixed(1)+' kg<br><strong>'+Math.min(d,15).toFixed(1)+' mg IV</strong><br><strong>'+Math.min(d,30).toFixed(1)+' mg IM/IN</strong><div class="dose-note"><b>MAX: 15 mg IV • 30 mg IM/IN</b></div>';return}
  let note=Number.isFinite(c.max)?'<b>MAX DOSE: '+c.max+' '+c.unit+'</b>':'<b>MAX DOSE: Not specified in PVFIRE protocol</b>';if(Number.isFinite(c.max)&&raw>c.max)note+=' • Maximum applied.';if(Number.isFinite(c.min)&&raw<c.min)note+=' • Minimum dose applied.';
  out.innerHTML=kg.toFixed(1)+' kg × '+c.perKg+' '+c.unit+'/kg<br><strong>'+dose.toFixed(dose<10?2:1)+' '+c.unit+'</strong><div class="dose-note">'+note+'</div>';
