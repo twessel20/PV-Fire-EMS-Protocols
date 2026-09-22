@@ -248,12 +248,27 @@ function render(){
  if(cat==='Home'){renderHome();return}
  if(cat==='Tools'){renderTools();renderBurnMap();return}
  let q=normText(document.querySelector('#q').value).toLowerCase(),a=[];
+ const searchText=v=>normText(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+ const searchableTitle=x=>searchText(displayTitle(x)).replace(/^(adult|pediatric|combined)\s+/,'');
  const matchesSearch=x=>{
    if(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications'))return false;
    if(!q)return true;
-   const terms=q.split(/\s+/).filter(Boolean);
-   const hay=normText([x.title,x.category,x.search,(x.aliases||[]).join(' '),(x.lines||[]).join(' ')].join(' ')).toLowerCase();
-   return terms.every(t=>hay.includes(t));
+   const query=searchText(q);
+   const terms=query.split(/\s+/).filter(Boolean);
+   const title=searchableTitle(x);
+   const hay=searchText([displayTitle(x),x.title,x.category,(x.aliases||[]).join(' '),x.search,(x.lines||[]).join(' ')].join(' '));
+   return title.includes(query)||hay.includes(query)||terms.every(t=>hay.includes(t));
+ };
+ const searchRank=x=>{
+   if(!q)return 0;
+   const query=searchText(q),title=searchableTitle(x),fullTitle=searchText(displayTitle(x));
+   if(title===query)return 100;
+   if(title.startsWith(query))return 90;
+   if(title.includes(query))return 80;
+   if(fullTitle.includes(query))return 70;
+   const aliases=searchText((x.aliases||[]).join(' '));
+   if(aliases.includes(query))return 60;
+   return 10;
  };
  if(cat==='Appendix'){
    if(q){
@@ -267,6 +282,7 @@ function render(){
    }
  }else{
    a=data.filter(x=>!(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications'))&&(cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat))&&matchesSearch(x));
+   if(q)a.sort((a,b)=>searchRank(b)-searchRank(a)||displayTitle(a).localeCompare(displayTitle(b)));
  }
  document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'<div class="empty">'+(q?'No protocols match “'+esc(q)+'”.<br><button class="back" style="margin-top:12px" onclick="clearSearch()">Clear Search</button>':'No protocols found in this section.')+'</div>'
 }
