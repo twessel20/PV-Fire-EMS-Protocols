@@ -14,15 +14,19 @@ body{background:#f4f7fa}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
-let data=[],cat='Home';const cats=['All','Favorites','Medical','Trauma','Procedures','Medications','Guidelines','Appendix','Tools'];let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
+let data=[],cat='Home',quickSet=null;const cats=['All','Favorites','Medical','Trauma','Procedures','Medications','Guidelines','Appendix','Tools'];let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function tabs(){let visible=role==='EMT'?cats.filter(c=>c!=='Medications'):cats;document.querySelector('#tabs').innerHTML=visible.map(c=>`<button class="tab ${c===cat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
 function leaveDetail(){location.hash='';document.querySelector('#detail').classList.remove('on');document.querySelector('#list').classList.remove('off')}
-function setCat(c){leaveDetail();cat=c;tabs();render();scrollTo(0,0)}
-function quickSearch(term){leaveDetail();cat='All';const q=document.querySelector('#q');q.value=term;tabs();render();scrollTo(0,0)}
-function quickMedical(){leaveDetail();cat='Medical';document.querySelector('#q').value='';tabs();render();scrollTo(0,0)}
+function setCat(c){quickSet=null;leaveDetail();cat=c;tabs();render();scrollTo(0,0)}
+const quickGroups={
+ cardiac:['combined-post-resuscitation','adult-chest-pain-stemi','adult-bradycardia','adult-tachycardia-narrow-complex','adult-tachycardia-wide-complex','adult-cardiac-arrest-vf-pulseless-vt','adult-cardiac-arrest-asystole-pea','adult-termination-of-resuscitation','pediatric-bradycardia','pediatric-tachycardia-narrow-complex','pediatric-tachycardia-wide-complex','pediatric-cardiac-arrest-vf-pulseless-vt','pediatric-cardiac-arrest-asystole-pea','12-lead-ecg-monitoring','lucas-device-procedure','transcutaneous-cardiac-pacing'],
+ respiratory:['adult-general-airway','adult-obstructed-airway','adult-asthma-copd','adult-chf-pulmonary-edema','pediatric-general-airway','pediatric-obstructed-airway','pediatric-wheezing','confirmation-of-advanced-airway-placement','cpap','end-tidal-co2-monitoring','igel','oral-endotracheal-intubation']
+};
+function quickSearch(group){leaveDetail();quickSet=group;cat='All';document.querySelector('#q').value='';tabs();render();scrollTo(0,0)}
+function quickMedical(){quickSet=null;leaveDetail();cat='Medical';document.querySelector('#q').value='';tabs();render();scrollTo(0,0)}
 function clearSearch(){const q=document.querySelector('#q');q.value='';leaveDetail();if(cat==='Home')cat='All';tabs();render();q.focus()}
-function goHome(){leaveDetail();cat='Home';document.querySelector('#q').value='';tabs();render();scrollTo(0,0)}
+function goHome(){quickSet=null;leaveDetail();cat='Home';document.querySelector('#q').value='';tabs();render();scrollTo(0,0)}
 function renderHome(){
  document.querySelector('#list').innerHTML=`
   <div class="home-guide">
@@ -306,6 +310,7 @@ function render(){
  }else{
    a=searchResults();
  }
+ if(quickSet&&quickGroups[quickSet]){const allowed=new Set(quickGroups[quickSet]);a=a.filter(x=>allowed.has(x.id));}
  document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'<div class="empty">'+(q?'No protocols match “'+esc(q)+'”.<br><button class="back" style="margin-top:12px" onclick="clearSearch()">Clear Search</button>':'No protocols found in this section.')+'</div>'
 }
 function toggleFav(id){fav.has(id)?fav.delete(id):fav.add(id);localStorage.setItem('pvfdFav',JSON.stringify([...fav]));render()}
