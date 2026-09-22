@@ -250,39 +250,46 @@ function render(){
  let q=normText(document.querySelector('#q').value).toLowerCase(),a=[];
  const searchText=v=>normText(v).toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
  const searchableTitle=x=>searchText(displayTitle(x)).replace(/^(adult|pediatric|combined)\s+/,'');
- const matchesSearch=x=>{
-   if(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications'))return false;
-   if(!q)return true;
-   const query=searchText(q);
-   const terms=query.split(/\s+/).filter(Boolean);
-   const title=searchableTitle(x);
-   const hay=searchText([displayTitle(x),x.title,x.category,(x.aliases||[]).join(' '),x.search,(x.lines||[]).join(' ')].join(' '));
-   return title.includes(query)||hay.includes(query)||terms.every(t=>hay.includes(t));
- };
+ const query=searchText(q);
+ const queryTerms=query.split(/\s+/).filter(Boolean);
+ const directSearchText=x=>searchText([searchableTitle(x),(x.aliases||[]).join(' '),x.search||''].join(' '));
+ const bodySearchText=x=>searchText((x.lines||[]).join(' '));
+ const directMatch=x=>!query||searchableTitle(x).includes(query)||directSearchText(x).includes(query)||queryTerms.every(t=>directSearchText(x).includes(t));
+ const bodyMatch=x=>!query||queryTerms.every(t=>bodySearchText(x).includes(t));
+ const scopeAllowed=x=>!(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications'));
+ const categoryAllowed=x=>cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat);
  const searchRank=x=>{
-   if(!q)return 0;
-   const query=searchText(q),title=searchableTitle(x),fullTitle=searchText(displayTitle(x));
+   if(!query)return 0;
+   const title=searchableTitle(x),aliases=searchText((x.aliases||[]).join(' '));
    if(title===query)return 100;
-   if(title.startsWith(query))return 90;
-   if(title.includes(query))return 80;
-   if(fullTitle.includes(query))return 70;
-   const aliases=searchText((x.aliases||[]).join(' '));
-   if(aliases.includes(query))return 60;
+   if(title.startsWith(query))return 95;
+   if(title.includes(query))return 90;
+   if(aliases===query)return 85;
+   if(aliases.includes(query))return 80;
+   if(queryTerms.every(t=>title.includes(t)))return 75;
    return 10;
+ };
+ const searchPool=()=>data.filter(x=>scopeAllowed(x)&&categoryAllowed(x));
+ const searchResults=()=>{
+   const pool=searchPool();
+   if(!query)return pool;
+   const direct=pool.filter(directMatch);
+   if(direct.length)return direct.sort((a,b)=>searchRank(b)-searchRank(a)||displayTitle(a).localeCompare(displayTitle(b)));
+   return pool.filter(bodyMatch).sort((a,b)=>displayTitle(a).localeCompare(displayTitle(b)));
  };
  if(cat==='Appendix'){
    if(q){
-     let matched=data.filter(x=>x.category!=='Appendix'&&matchesSearch(x));
+     let matched=data.filter(x=>x.category!=='Appendix'&&scopeAllowed(x)&&directMatch(x));
+     if(!matched.length)matched=data.filter(x=>x.category!=='Appendix'&&scopeAllowed(x)&&bodyMatch(x));
      let ids=[...new Set(matched.flatMap(x=>appendixMap[x.id]||[]))];
      a=ids.map(id=>data.find(x=>x.id===id)).filter(Boolean);
-     if(!a.length)a=data.filter(x=>x.category==='Appendix'&&matchesSearch(x));
+     if(!a.length){const refs=data.filter(x=>x.category==='Appendix'&&scopeAllowed(x));const direct=refs.filter(directMatch);a=direct.length?direct:refs.filter(bodyMatch)}
    }else{
      const primary=['12-lead-ecg-interpretation','cincinnati-prehospital-stroke-scale','apgar-score','glasgow-coma-scale','lucas-device-appendix','pain-scale','pediatric-vital-sign-ranges-by-age','epinephrine-1-100000-push-dose-appendix','total-body-surface-area','tcd-destinations'];
      a=primary.map(id=>data.find(x=>x.id===id)).filter(x=>x&&!(role==='EMT'&&isAlsOnly(x)));
    }
  }else{
-   a=data.filter(x=>!(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications'))&&(cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat))&&matchesSearch(x));
-   if(q)a.sort((a,b)=>searchRank(b)-searchRank(a)||displayTitle(a).localeCompare(displayTitle(b)));
+   a=searchResults();
  }
  document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'<div class="empty">'+(q?'No protocols match “'+esc(q)+'”.<br><button class="back" style="margin-top:12px" onclick="clearSearch()">Clear Search</button>':'No protocols found in this section.')+'</div>'
 }
