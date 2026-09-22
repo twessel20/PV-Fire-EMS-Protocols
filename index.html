@@ -472,7 +472,27 @@ function controlledSubstancePage21(){
  ];
  return '<div class="section">NARCOTIC ACCOUNTABILITY — PAGE 21</div>'+rows.map(r=>'<div class="line '+(r[0]==='b'?'bullet':r[0]==='s'?'subbullet':r[0]==='ss'?'subsub':'para')+'">'+esc(r[1])+'</div>').join('');
 }
+function formatDnrProtocol(x){
+ const raw=(x.lines||[]).map(normText).filter(Boolean)
+   .filter(l=>!/^PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS$/i.test(l))
+   .filter(l=>!/^DO NOT RESUSCITATE$/i.test(l));
+ let html='',section='';
+ for(let i=0;i<raw.length;i++){
+   let t=raw[i];
+   if(/^(GUIDELINES|DOCUMENTATION)$/i.test(t)){section=t.toUpperCase();html+='<div class="section">'+esc(section)+'</div>';continue}
+   if(/^\d+\.\s+/.test(t)){
+     let parts=[t];
+     while(i+1<raw.length&&!/^\d+\.\s+/.test(raw[i+1])&&!/^(GUIDELINES|DOCUMENTATION)$/i.test(raw[i+1]))parts.push(raw[++i]);
+     html+='<div class="line bullet">'+esc(normText(parts.join(' ')))+'</div>';continue;
+   }
+   let parts=[t];
+   while(i+1<raw.length&&!/^\d+\.\s+/.test(raw[i+1])&&!/^(GUIDELINES|DOCUMENTATION)$/i.test(raw[i+1]))parts.push(raw[++i]);
+   html+='<div class="line para">'+esc(normText(parts.join(' ')))+'</div>';
+ }
+ return html;
+}
 function formatProtocol(x){
+ if(x.id==='do-not-resuscitate')return formatDnrProtocol(x);
  if(x.id==='controlled-substance-verification'||x.id==='narcotic-accountability'){
    const raw=(x.lines||[]).map(normText).filter(Boolean).filter(l=>l.toUpperCase()!=='PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS').filter(l=>!/^NARCOTIC ACCOUNTABILITY$/i.test(l)).filter(l=>!/^CONTROLLED SUBSTANCE VERIFICATION$/i.test(l));
    return raw.map(t=>{let m=t.match(/^(\d+\.|[a-z]\.|[ivx]+\.)\s*(.*)$/i);if(m){let cls=/^\d/.test(m[1])?'bullet':/^[a-z]/i.test(m[1])?'subbullet':'subsub';return '<div class="line '+cls+'">'+esc(m[2]||t)+'</div>'}return '<div class="line para">'+esc(t)+'</div>'}).join('');
