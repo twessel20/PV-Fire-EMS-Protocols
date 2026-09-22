@@ -19,6 +19,9 @@ def clean_lines(text):
         out.append(s)
     return out
 
+def norm(s):
+    return re.sub(r'[^a-z0-9]+',' ',s.lower()).strip()
+
 def search_blob(item):
     return (' '.join([item.get('title',''),*item.get('lines',[]),*item.get('aliases',[])])).lower()
 
@@ -26,32 +29,52 @@ def extract_pdf(path):
     d=fitz.open(path)
     return [clean_lines(p.get_text('text')) for p in d]
 
+def detect_protocol(data,path,lines):
+    # Exact ID filename is accepted, but not required.
+    stem=path.stem.lower()
+    direct=[x for x in data if x['id'].lower()==stem]
+    if direct:
+        return direct[0]
+
+    text=norm(' '.join(lines))
+    opening=norm(' '.join(lines[:45]))
+
+    # Prefer an official protocol title appearing near the start of the upload.
+    near=[x for x in data if norm(x['title']) and norm(x['title']) in opening]
+    if near:
+        near.sort(key=lambda x:len(norm(x['title'])),reverse=True)
+        return near[0]
+
+    # Fall back to title anywhere in the uploaded replacement.
+    anywhere=[x for x in data if norm(x['title']) and norm(x['title']) in text]
+    if anywhere:
+        anywhere.sort(key=lambda x:len(norm(x['title'])),reverse=True)
+        return anywhere[0]
+    return None
+
 def replace_single(data,path):
-    slug=path.stem
-    matches=[x for x in data if x['id']==slug]
-    if not matches:
-        print(f'ERROR: no existing protocol id {slug!r}. Rename the PDF to match the protocol id.',file=sys.stderr)
-        return False
     pages=extract_pdf(path)
     lines=[x for pg in pages for x in pg]
     if not lines:
         print(f'ERROR: no extractable text in {path.name}',file=sys.stderr)
         return False
-    item=matches[0]
-    dest=PUB/path.name
+
+    item=detect_protocol(data,path,lines)
+    if item is None:
+        print(f'ERROR: could not identify which existing protocol {path.name} replaces. No changes published.',file=sys.stderr)
+        return False
+
+    dest=PUB/f'{item["id"]}.pdf'
     shutil.copy2(path,dest)
     item['lines']=lines
     item['search']=search_blob({**item,'lines':lines})
-    item['sourceFile']=f'updates/published/{path.name}'
+    item['sourceFile']=f'updates/published/{item["id"]}.pdf'
     item['updated']=datetime.date.today().isoformat()
     item['page']=1
     item['endPage']=len(pages)
     path.unlink()
-    print(f'Updated {item["title"]}')
+    print(f'Published single-protocol update: {item["title"]}')
     return True
-
-def norm(s):
-    return re.sub(r'[^a-z0-9]+',' ',s.lower()).strip()
 
 def rebuild_full(data,path):
     doc=fitz.open(path)
@@ -59,6 +82,7 @@ def rebuild_full(data,path):
     bootstrap=all(not x.get('lines') for x in data)
 
     if bootstrap:
+        # First publication uses the verified page map already stored in protocols.json.
         for item in data:
             start=max(0,int(item['page'])-1)
             end=min(len(doc),int(item['endPage']))
@@ -73,6 +97,7 @@ def rebuild_full(data,path):
             item['updated']=datetime.date.today().isoformat()
             item['sourceFile']=f'updates/published/current-protocol-book.pdf#page={item["page"]}'
     else:
+        # Later complete books are re-indexed by official protocol title.
         normpages=[norm(t) for t in ptexts]
         starts=[]
         missing=[]
