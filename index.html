@@ -472,6 +472,30 @@ function controlledSubstancePage21(){
  ];
  return '<div class="section">NARCOTIC ACCOUNTABILITY — PAGE 21</div>'+rows.map(r=>'<div class="line '+(r[0]==='b'?'bullet':r[0]==='s'?'subbullet':r[0]==='ss'?'subsub':'para')+'">'+esc(r[1])+'</div>').join('');
 }
+function formatGuidelineSource(x){
+ const raw=(x.lines||[]).map(normText).filter(Boolean)
+   .filter(l=>!/^PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS$/i.test(l))
+   .filter(l=>!sameTitle(l,x.title));
+ let html='';
+ const headingRx=/^(GUIDELINES?|DOCUMENTATION|PROCEDURES?|INDICATIONS|CONTRAINDICATIONS|NOTES|POLICY|NO RIGHT TO REFUSE|STANDARD PRECAUTIONS|CONTACT PRECAUTIONS|DROPLET PRECAUTIONS|AIRBORNE PRECAUTIONS|SPECIAL RESPIRATORY PRECAUTIONS|EVD\/VHF PRECAUTIONS|GENERAL ROUTING|STEMI ROUTING|STROKE ROUTING|TRAUMA ROUTING|PEDIATRIC ROUTING)\s*:?\s*$/i;
+ const itemRx=/^(\d+\.|[a-z]\.|[ivx]+\.)(?:\s+|$)/i;
+ for(let i=0;i<raw.length;i++){
+   let t=raw[i];
+   if(headingRx.test(t)){html+='<div class="section">'+esc(t.replace(/:$/,''))+'</div>';continue}
+   let m=t.match(itemRx);
+   if(m){
+     let depth=/^\d/.test(m[1])?0:/^[a-z]/i.test(m[1])?1:2,parts=[t];
+     while(i+1<raw.length&&!headingRx.test(raw[i+1])&&!itemRx.test(raw[i+1])&&!/^[•▪]$/.test(raw[i+1]))parts.push(raw[++i]);
+     html+='<div class="line '+(depth===0?'bullet':depth===1?'subbullet':'subsub')+'">'+esc(normText(parts.join(' ')))+'</div>';
+     continue;
+   }
+   if(/^[•▪]$/.test(t)&&raw[i+1]){html+='<div class="line '+(t==='▪'?'subsub':'bullet')+'">'+esc(raw[++i])+'</div>';continue}
+   let parts=[t];
+   while(i+1<raw.length&&!headingRx.test(raw[i+1])&&!itemRx.test(raw[i+1])&&!/^[•▪]$/.test(raw[i+1]))parts.push(raw[++i]);
+   html+='<div class="line para">'+esc(normText(parts.join(' ')))+'</div>';
+ }
+ return html;
+}
 function formatDnrProtocol(x){
  const raw=(x.lines||[]).map(normText).filter(Boolean)
    .filter(l=>!/^PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS$/i.test(l))
@@ -493,6 +517,7 @@ function formatDnrProtocol(x){
 }
 function formatProtocol(x){
  if(x.id==='do-not-resuscitate')return formatDnrProtocol(x);
+ if(x.category==='Guidelines'&&x.id!=='controlled-substance-verification'&&x.id!=='narcotic-accountability')return formatGuidelineSource(x);
  if(x.id==='controlled-substance-verification'||x.id==='narcotic-accountability'){
    const raw=(x.lines||[]).map(normText).filter(Boolean).filter(l=>l.toUpperCase()!=='PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS').filter(l=>!/^NARCOTIC ACCOUNTABILITY$/i.test(l)).filter(l=>!/^CONTROLLED SUBSTANCE VERIFICATION$/i.test(l));
    return raw.map(t=>{let m=t.match(/^(\d+\.|[a-z]\.|[ivx]+\.)\s*(.*)$/i);if(m){let cls=/^\d/.test(m[1])?'bullet':/^[a-z]/i.test(m[1])?'subbullet':'subsub';return '<div class="line '+cls+'">'+esc(m[2]||t)+'</div>'}return '<div class="line para">'+esc(t)+'</div>'}).join('');
