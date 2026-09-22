@@ -51,6 +51,9 @@ body{background:#f4f7fa}
 
 /* v54 clearer calculator inputs */
 .calc-field{margin-top:14px}.calc-field>label{display:block;font-size:13px;font-weight:850;color:#173a5e;margin-bottom:5px}.calc-field small{display:block;margin-top:5px;color:#64748b;line-height:1.35}.calc-pair{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:8px}.calc-pair>.calc-unit-input{min-width:0}.calc-unit-input{display:flex;align-items:stretch}.calc-unit-input .tool-input{min-width:0;margin-top:0;border-radius:10px 0 0 10px}.calc-unit-input span{display:flex;align-items:center;padding:0 10px;background:#eef4f8;border:1px solid #d1d5db;border-left:0;border-radius:0 10px 10px 0;font-size:12px;font-weight:800;color:#334155;white-space:nowrap}.calc-field>.tool-input,.calc-pair>.tool-input{margin-top:0}
+
+/* v55 scoring and triage tools */
+.score-grid{display:grid;gap:12px;margin-top:12px}.score-field{display:block;padding:10px;background:#f8fafc;border:1px solid #dbe4ee;border-radius:10px}.score-field b{display:block;color:#173a5e;font-size:14px}.score-field .tool-input{margin-top:6px}.score-total{font-size:22px;text-align:center;color:#173a5e;margin-top:14px}.triage-box{margin-top:14px;padding:12px;background:#f8fafc;border:1px solid #dbe4ee;border-radius:12px}.triage-box h4{margin:0 0 10px;color:#173a5e}.triage-actions{display:grid;gap:8px}.triage-actions .tool-btn{margin-top:0}.triage-result{display:grid;gap:6px;text-align:center;padding:12px}.triage-result b{font-size:22px;color:#173a5e}.triage-result span{color:#475569;line-height:1.4}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -150,6 +153,9 @@ function renderTools(){
       <button class="tool-launch" onclick="openToolCard('lido')"><span class="tool-launch-icon">💉</span><span><b>Lidocaine Dose</b><small>Adult cardiac arrest dose calculator</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('dopamine')"><span class="tool-launch-icon">IV</span><span><b>Dopamine Gravity Drip</b><small>Calculate gravity tubing gtt/min</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn Calculator — TBSA + Parkland</b><small>One tool: burn map, TBSA calculation, and Parkland fluid formula</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('apgar')"><span class="tool-launch-icon">👶</span><span><b>APGAR Score</b><small>Appearance, pulse, grimace, activity, respiration</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('gcs')"><span class="tool-launch-icon">🧠</span><span><b>Glasgow Coma Scale</b><small>Eye, verbal, and motor scoring</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('start')"><span class="tool-launch-icon">🚑</span><span><b>START Triage</b><small>Step-by-step adult mass-casualty triage aid</small></span><span class="tool-chevron">›</span></button>
     </div>
     <div id="toolDetail"></div>`;
 }
@@ -174,6 +180,28 @@ function openToolCard(which){
    <div class="calc-field"><label for="dopGtt">4. Tubing</label><select id="dopGtt" class="tool-input"><option value="10">10 gtt/mL tubing</option><option value="60">60 gtt/mL tubing</option></select></div>
    <button class="tool-btn" onclick="calcDopamine()">Calculate gtt/min</button><div id="dopResult" class="tool-result" style="display:none"></div>
    <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose mcg/kg/min × weight kg × drop factor gtt/mL) ÷ concentration mcg/mL.</div></div>`;
+ if(which==='apgar')host.innerHTML=back+`
+   <div class="tool-card"><h3>APGAR Score</h3><div class="tool-note">Score each category 0, 1, or 2. PVFIRE Childbirth protocol documents APGAR at 1 and 5 minutes.</div>
+   <div class="score-grid">
+   ${scoreSelect('apAppearance','Appearance / color',[['0','Blue or pale all over'],['1','Body pink, extremities blue'],['2','Completely pink']])}
+   ${scoreSelect('apPulse','Pulse / heart rate',[['0','Absent'],['1','Below 100/min'],['2','100/min or greater']])}
+   ${scoreSelect('apGrimace','Grimace / reflex irritability',[['0','No response'],['1','Grimace'],['2','Cough, sneeze, cry, or active withdrawal']])}
+   ${scoreSelect('apActivity','Activity / muscle tone',[['0','Limp'],['1','Some flexion'],['2','Active motion']])}
+   ${scoreSelect('apResp','Respiration',[['0','Absent'],['1','Slow or irregular'],['2','Good respirations / strong cry']])}
+   </div><div id="apgarResult" class="tool-result score-total"><b>APGAR: — / 10</b></div>
+   <div class="tool-note" style="margin-top:10px">The PVFIRE source includes an APGAR reference page (Appendix p.147). Use the official reference for department-authoritative presentation.</div></div>`;
+ if(which==='gcs')host.innerHTML=back+`
+   <div class="tool-card"><h3>Glasgow Coma Scale</h3><div class="tool-note">Select the best observed response in each category.</div>
+   <div class="score-grid">
+   ${scoreSelect('gcsEye','Eye opening',[['1','None'],['2','To pressure'],['3','To sound'],['4','Spontaneous']])}
+   ${scoreSelect('gcsVerbal','Verbal response',[['1','None'],['2','Incomprehensible sounds'],['3','Inappropriate words'],['4','Confused'],['5','Oriented']])}
+   ${scoreSelect('gcsMotor','Motor response',[['1','None'],['2','Extension'],['3','Abnormal flexion'],['4','Normal flexion / withdrawal'],['5','Localizes'],['6','Obeys commands']])}
+   </div><div id="gcsResult" class="tool-result score-total"><b>GCS: — / 15</b></div>
+   <div class="tool-note" style="margin-top:10px">PVFIRE uses GCS in patient assessment and trauma destination criteria; the official Glasgow reference is Appendix p.149.</div></div>`;
+ if(which==='start')host.innerHTML=back+`
+   <div class="tool-card"><h3>START Triage</h3><div class="tool-note"><b>Adult START decision aid.</b> Follow the prompts in order. This tool is an added field aid; the current PVFIRE protocol dataset directs crews to begin triage as needed but does not contain a department START algorithm.</div>
+   <div id="startBox" class="triage-box"></div><button class="tool-btn" style="background:#475569" onclick="resetStart()">Restart START Triage</button></div>`;
+ if(which==='start')resetStart();
  if(which==='burn'){host.innerHTML=back+`
    <div class="tool-card"><h3>Burn Calculator — TBSA + Parkland</h3>
    <div class="tool-note">Estimate total body surface area using the Rule of Nines, then use that TBSA directly in the Parkland burn-volume calculation below.</div>
@@ -272,6 +300,23 @@ function updateBurnTotal(){
   const el=document.querySelector('#burnTotal');if(el)el.textContent=burnTBSA+'%';
   const pr=document.querySelector('#parklandResult');if(pr)pr.style.display='none';
 }
+function scoreSelect(id,label,opts){return '<label class="score-field"><b>'+esc(label)+'</b><select id="'+id+'" class="tool-input" onchange="updateScores()"><option value="">Select response…</option>'+opts.map(o=>'<option value="'+o[0]+'">'+o[0]+' — '+esc(o[1])+'</option>').join('')+'</select></label>'}
+function updateScores(){
+ const ap=['apAppearance','apPulse','apGrimace','apActivity','apResp'].map(id=>document.getElementById(id));
+ if(ap.every(Boolean)){const vals=ap.map(e=>e.value);document.getElementById('apgarResult').innerHTML=vals.every(v=>v!=='')?'<b>APGAR: '+vals.reduce((a,v)=>a+Number(v),0)+' / 10</b>':'<b>APGAR: — / 10</b>'}
+ const gc=['gcsEye','gcsVerbal','gcsMotor'].map(id=>document.getElementById(id));
+ if(gc.every(Boolean)){const vals=gc.map(e=>e.value);document.getElementById('gcsResult').innerHTML=vals.every(v=>v!=='')?'<b>GCS: '+vals.reduce((a,v)=>a+Number(v),0)+' / 15</b>':'<b>GCS: — / 15</b>'}
+}
+let startStep='walk';
+function startButtons(items){return '<div class="triage-actions">'+items.map(x=>'<button class="tool-btn" onclick="'+x[1]+'">'+x[0]+'</button>').join('')+'</div>'}
+function startResult(label,detail){document.getElementById('startBox').innerHTML='<div class="triage-result"><b>'+label+'</b><span>'+detail+'</span></div>'}
+function resetStart(){startStep='walk';const b=document.getElementById('startBox');if(!b)return;b.innerHTML='<h4>1. Can the patient walk?</h4>'+startButtons([['Yes — walking','startResult(\'MINOR / GREEN\',\'Walking wounded. Continue secondary triage per incident plan.\')'],['No','startBreathing()']])}
+function startBreathing(){document.getElementById('startBox').innerHTML='<h4>2. Is the patient breathing?</h4>'+startButtons([['Yes','startRespRate()'],['No','startAirway()']])}
+function startAirway(){document.getElementById('startBox').innerHTML='<h4>Open/reposition the airway. Does breathing begin?</h4>'+startButtons([['Yes','startResult(\'IMMEDIATE / RED\',\'Breathing begins after airway repositioning.\')'],['No','startResult(\'DECEASED / BLACK\',\'No breathing after airway repositioning.\')']])}
+function startRespRate(){document.getElementById('startBox').innerHTML='<h4>3. Respiratory rate?</h4>'+startButtons([['Over 30/min','startResult(\'IMMEDIATE / RED\',\'Respiratory rate is over 30/min.\')'],['30/min or less','startPerfusion()']])}
+function startPerfusion(){document.getElementById('startBox').innerHTML='<h4>4. Perfusion adequate?</h4><div class="tool-note">Classic START: radial pulse present or capillary refill ≤ 2 seconds.</div>'+startButtons([['No — inadequate','startResult(\'IMMEDIATE / RED\',\'Perfusion criterion is abnormal.\')'],['Yes — adequate','startMental()']])}
+function startMental(){document.getElementById('startBox').innerHTML='<h4>5. Can the patient obey simple commands?</h4>'+startButtons([['No','startResult(\'IMMEDIATE / RED\',\'Unable to obey simple commands.\')'],['Yes','startResult(\'DELAYED / YELLOW\',\'Breathing, perfusion, and mental-status criteria do not meet Immediate criteria.\')']])}
+
 function calcParkland(){
   const box=document.querySelector('#parklandResult');
   const w=parseFloat(document.querySelector('#burnWeight').value);
