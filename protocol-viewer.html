@@ -5,27 +5,24 @@
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f4f5;color:#18181b}
 header{background:#991b1b;color:white;padding:12px 14px;position:sticky;top:0;z-index:2}
 h1{font-size:17px;margin:0}.sub{font-size:12px;opacity:.85;margin-top:3px}
-main{max-width:900px;margin:auto;padding:10px}.bar{display:flex;gap:8px;margin-bottom:10px}
-button{border:0;border-radius:9px;padding:10px 12px;font-weight:800}.back{background:#27272a;color:white}
-#status{padding:20px;text-align:center;color:#52525b}.page{background:white;border-radius:10px;overflow:hidden;border:1px solid #ddd}
-canvas{display:block;width:100%;height:auto}
+main{max-width:1000px;margin:auto;padding:10px}.bar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+button,a.btn{border:0;border-radius:9px;padding:10px 12px;font-weight:800;text-decoration:none;font-size:14px}.back{background:#27272a;color:white}.open{background:#991b1b;color:white}
+.frame{background:white;border:1px solid #ddd;border-radius:10px;overflow:hidden;height:calc(100vh - 145px);min-height:560px}
+iframe{border:0;width:100%;height:100%;display:block;background:white}
 .notice{font-size:12px;color:#52525b;margin:9px 2px;line-height:1.35}
 </style></head><body>
 <header><h1 id="title">PVFIRE Source Protocol</h1><div class="sub" id="pageLabel"></div></header>
-<main><div class="bar"><button class="back" onclick="history.back()">‹ Back to Protocol</button></div>
-<div id="status">Loading source page…</div><div class="page"><canvas id="pdf"></canvas></div>
-<div class="notice">This view intentionally displays only the source page applicable to the selected protocol, not the entire protocol book.</div></main>
-<script type="module">
-const q=new URLSearchParams(location.search),raw=q.get('src')||'',src=new URL(raw,location.href).href,page=Math.max(1,parseInt(q.get('page')||'1',10)),title=q.get('title')||'PVFIRE Source Protocol';
-document.querySelector('#title').textContent=title;document.querySelector('#pageLabel').textContent='Source page '+page;
-try{
- const pdfjs=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');
- pdfjs.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
- const doc=await pdfjs.getDocument(src).promise,p=await doc.getPage(page),base=p.getViewport({scale:1});
- const width=Math.min(900,Math.max(320,document.querySelector('main').clientWidth-20)),scale=width/base.width,view=p.getViewport({scale});
- const c=document.querySelector('#pdf'),ctx=c.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
- c.width=Math.floor(view.width*dpr);c.height=Math.floor(view.height*dpr);c.style.width=view.width+'px';c.style.height=view.height+'px';
- await p.render({canvasContext:ctx,viewport:view,transform:dpr===1?null:[dpr,0,0,dpr,0,0]}).promise;
- document.querySelector('#status').style.display='none';
-}catch(e){document.querySelector('#status').innerHTML='<b>Unable to render this source page.</b><br><button class="back" style="margin-top:12px" onclick="location.href=\''+src+'#page='+page+'\'">Open source PDF at page '+page+'</button>'}
+<main><div class="bar"><button class="back" onclick="history.back()">‹ Back to Protocol</button><a id="openPdf" class="btn open" target="_blank" rel="noopener">Open PDF Page</a></div>
+<div class="frame"><iframe id="pdf" title="PVFIRE source protocol page"></iframe></div>
+<div class="notice">Source view opens the official PVFIRE protocol book at the page assigned to this protocol.</div></main>
+<script>
+const q=new URLSearchParams(location.search);
+const raw=q.get('src')||'updates/published/current-protocol-book.pdf';
+const page=Math.max(1,parseInt(q.get('page')||'1',10));
+const title=q.get('title')||'PVFIRE Source Protocol';
+const src=new URL(raw,location.href).href.split('#')[0]+'#page='+page+'&zoom=page-width';
+document.getElementById('title').textContent=title;
+document.getElementById('pageLabel').textContent='Source page '+page;
+document.getElementById('pdf').src=src;
+document.getElementById('openPdf').href=src;
 </script></body></html>
