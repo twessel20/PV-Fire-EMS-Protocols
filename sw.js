@@ -1,5 +1,5 @@
 const C='pvfire-ems-shell-v32';
-const SHELL=['./','index.html','protocols.json','manifest.webmanifest'];
+const SHELL=['./','index.html','admin.html','protocols.json','manifest.webmanifest','pvfd-logo.jpg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.origin!==location.origin)return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request,{cache:'no-store'}).then(r=>{let c=r.clone();caches.open(C).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request)));return}if(u.pathname.endsWith('/protocols.json')){e.respondWith(fetch(e.request,{cache:'no-store'}).then(r=>{let c=r.clone();caches.open(C).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request)));return}e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(r=>{if(e.request.method==='GET'&&r.ok){let c=r.clone();caches.open(C).then(x=>x.put(e.request,c))}return r})))});
