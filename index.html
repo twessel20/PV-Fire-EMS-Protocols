@@ -432,7 +432,7 @@ const medicationDoseCalcs={
 };
 function protocolDoseTools(x){
  const cs=protocolDoseCalcs[x.id]||medicationDoseCalcs[x.id];if(!cs)return '';
- return '<div class="dose-tools"><h4>Quick Weight-Based Dose Calculator</h4>'+cs.map(c=>{const id='dc-'+x.id+'-'+c.key;return '<div class="dose-calc"><div class="med-subhead">'+esc(c.label)+'</div><div class="dose-note">'+esc(c.formula)+'</div><div class="dose-row"><input id="'+id+'-w" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight"><select id="'+id+'-u"><option value="lb">lb</option><option value="kg">kg</option></select></div><button class="dose-btn" onclick="calcProtocolDose(\''+x.id+'\',\''+c.key+'\')">Calculate dose</button><div id="'+id+'-o" class="dose-out"></div></div>'}).join('')+'<div class="dose-note">Uses the weight-based dose printed in this PVFIRE protocol. Verify medication, route, concentration, minimum/maximum dose, and indication before administration.</div></div>';
+ return '<div class="dose-tools" style="margin-top:24px"><h4>Weight-Based Dose Calculator</h4><div class="dose-note" style="margin-bottom:10px">Protocol dosing calculator — enter patient weight in lb or kg.</div>'+cs.map(c=>{const id='dc-'+x.id+'-'+c.key;return '<div class="dose-calc"><div class="med-subhead">'+esc(c.label)+'</div><div class="dose-note">'+esc(c.formula)+'</div><div class="dose-row"><input id="'+id+'-w" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight"><select id="'+id+'-u"><option value="lb">lb</option><option value="kg">kg</option></select></div><button class="dose-btn" onclick="calcProtocolDose(\''+x.id+'\',\''+c.key+'\')">Calculate dose</button><div id="'+id+'-o" class="dose-out"></div></div>'}).join('')+'<div class="dose-note">Uses the weight-based dose printed in this PVFIRE protocol. Verify medication, route, concentration, minimum/maximum dose, and indication before administration.</div></div>';
 }
 function calcProtocolDose(pid,key){
  const c=((protocolDoseCalcs[pid]||medicationDoseCalcs[pid])||[]).find(v=>v.key===key),id='dc-'+pid+'-'+key,out=document.getElementById(id+'-o'),w=parseFloat(document.getElementById(id+'-w').value),u=document.getElementById(id+'-u').value;
@@ -444,7 +444,7 @@ function calcProtocolDose(pid,key){
 }
 
 function formatProtocol(x){
- if(x.category==='Medications')return protocolDoseTools(x)+formatMedication(x);
+ if(x.category==='Medications')return formatMedication(x);
  let ts=scopedTokens(x);
  if(role==='EMT')ts=ts.filter(t=>t.heading||t.scope!=='als');
  let rendered=[],lastHeading='';
@@ -495,7 +495,7 @@ function burnProtocolTools(){
 }
 function openP(id){
  let x=data.find(z=>z.id===id);if(!x)return;location.hash=id;document.querySelector('#list').classList.add('off');
- let body=(x.category==='Medications'?'':protocolDoseTools(x))+(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x),src=sourceHref(x),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
+ let body=(x.id==='combined-burn'?burnProtocolTools():'')+formatProtocol(x)+protocolDoseTools(x),src=sourceHref(x),roleText=role==='EMT'?'EMT selected — showing the BLS portion of this protocol.':'Paramedic selected — showing the complete protocol.',modeClass=role==='EMT'?'bls':'als',modeText=role==='EMT'?'BLS PROTOCOL VIEW':'ALS PROTOCOL VIEW';
  document.querySelector('#detail').innerHTML=`<button class="back" onclick="closeP()">‹ Back</button><div class="card"><button class="fav" onclick="toggleFav('${x.id}');openP('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><h2>${esc(displayTitle(x))}</h2><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:'2026 PVFIRE EMS Protocols'}</div><div class="protocol-mode ${modeClass}"><span class="dot"></span>${modeText}</div><div class="role-note"><b>${esc(roleText)}</b></div>${relatedAppendixHtml(x)}${src?`<p><a class="source" href="${esc(src)}" target="_blank" rel="noopener">View Source Protocol PDF ↗</a></p>`:''}<div class="notice">Quick-reference display of the PVFIRE source protocol. Use the official source when exact wording, layout, tables, or context are needed.</div><div class="protocol-body">${body}</div></div>`;
  document.querySelector('#detail').classList.add('on');
  if(x.id==='combined-burn')renderBurnMap();
