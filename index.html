@@ -66,6 +66,9 @@ body{background:#f4f7fa}
 
 /* v59 list and medication display cleanup */
 .protocol-body .bullet,.protocol-body .subbullet,.protocol-body .subsub{display:block}.protocol-body .bullet:before,.protocol-body .subbullet:before,.protocol-body .subsub:before{line-height:1.48}.med-item{display:list-item;list-style-type:disc;list-style-position:outside;margin:9px 0 9px 22px;padding-left:3px;position:static}.med-item:before{content:none}.med-dose{display:block;margin:10px 0;font-weight:750}.med-text{display:block;margin:9px 0}.med-label+.med-item,.med-label+.med-dose,.med-label+.med-text{margin-top:10px}
+
+/* TCD v62 quick-reference display */
+.tcd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 16px}.tcd-card{background:#fff;border:1px solid #d8e3ec;border-radius:12px;padding:12px;box-shadow:0 1px 3px #0000000d}.tcd-card h3{margin:0 0 8px;color:#173a5e;font-size:15px;display:flex;align-items:center;gap:7px}.tcd-hospital{padding:7px 0;border-top:1px solid #edf2f6;color:#1f2937;font-size:14px}.tcd-hospital:first-of-type{border-top:0}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -647,7 +650,18 @@ function formatDnrProtocol(x){
  }
  return html;
 }
-function formatAppendix(x){
+function formatTcdQuickReference(x){
+ const groups=[
+  ['🚑','Trauma Centers',['Liberty Hospital','Centerpoint','Belton Regional Medical Center','KU Medical Center','Children\'s Mercy Hospital','North Kansas City Hospital','Research Medical Center','Truman Medical Center Hospital Hill']],
+  ['❤️','STEMI Centers',['Liberty Hospital','Centerpoint','KU Medical Center','North Kansas City Hospital','Research Medical Center','St Lukes Plaza','Lee\'s Summit Medical Center']],
+  ['🧠','Stroke — Primary',['Liberty Hospital','Centerpoint','Belton Regional Medical Center','Lee\'s Summit Medical Center','Research Medical Center','St Joseph Medical Center','Menorah Medical Center','St Lukes East','North Kansas City Hospital','St Lukes North','Olathe Medical Center','St Mary\'s Blue Springs','Overland Park Regional Medical Center','Providence Medical Center','Shawnee Mission Medical Center','St Lukes South']],
+  ['🧠','Stroke — Comprehensive',['KU Medical Center','Research Medical Center','St Lukes Plaza','Truman Medical Center Hospital Hill']],
+  ['🔥','Burn Centers',['KU Medical Center','Children\'s Mercy Hospital']],
+  ['🫀','LVAD Destinations',['North Kansas City Hospital','Liberty Hospital']]
+ ];
+ return '<div class="reference-source"><div class="section">TCD DESTINATIONS — QUICK REFERENCE</div><div class="notice">Quick display transcribed from the official PVFIRE TCD Destinations page. Verify the official page below when needed.</div><div class="tcd-grid">'+groups.map(g=>'<div class="tcd-card"><h3><span>'+g[0]+'</span>'+esc(g[1])+'</h3>'+g[2].map(h=>'<div class="tcd-hospital">'+esc(h)+'</div>').join('')+'</div>').join('')+'</div>'+formatAppendixPage(x)+'</div>';
+}
+function formatAppendixPage(x){
  const src=x.sourceFile||x.pageUrl||'updates/published/current-protocol-book.pdf';
  const pdf=src.split('#')[0],start=Number(x.page||((src.match(/#page=(\d+)/i)||[])[1])||1),end=Number(x.endPage||start);
  const range=end>start?'Pages '+start+'–'+end:'Page '+start;
@@ -660,6 +674,7 @@ function formatAppendix(x){
    '<div class="notice">Displayed directly from the official PVFIRE protocol book so the original table, diagram, scoring grid, and formatting are preserved.</div>'+
  '</div>';
 }
+function formatAppendix(x){return x.id==='tcd-destinations'?formatTcdQuickReference(x):formatAppendixPage(x)}
 function formatProtocol(x){
  if(x.category==='Appendix')return formatAppendix(x);
  if(x.id==='do-not-resuscitate')return formatDnrProtocol(x);
