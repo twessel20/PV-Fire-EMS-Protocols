@@ -205,6 +205,62 @@ async function lookupPatientMedication(){
    host.innerHTML='<div class="notice"><b>Medication lookup requires an internet connection.</b><br>The PVFire protocol content can still work from its offline cache.</div>';
  }
 }
+function patientMedPlainSummary(name,classes,label){
+ const hay=[name,(classes||[]).join(' '),(label?.openfda?.generic_name||[]).join(' '),(label?.openfda?.brand_name||[]).join(' ')].join(' ').toLowerCase();
+ const has=(...xs)=>xs.some(x=>hay.includes(x));
+ if(has('warfarin','apixaban','eliquis','rivaroxaban','xarelto','dabigatran','pradaxa','edoxaban','savaysa','anticoagulant','factor xa inhibitor','vitamin k antagonist','direct thrombin inhibitor'))
+  return {cls:'Blood thinner (anticoagulant)',moa:'Makes it harder for the blood to form clots.',use:'Often prescribed to prevent or treat blood clots, including DVT/PE, and to lower stroke risk in atrial fibrillation.'};
+ if(has('clopidogrel','plavix','ticagrelor','brilinta','prasugrel','effient','antiplatelet'))
+  return {cls:'Antiplatelet / blood thinner',moa:'Makes platelets less sticky so clots are less likely to form.',use:'Often prescribed after a heart attack, stroke, or coronary stent, or for other artery disease.'};
+ if(has('metoprolol','atenolol','carvedilol','propranolol','beta blocker','beta-blocker'))
+  return {cls:'Beta blocker',moa:'Slows the heart and reduces how hard it has to work.',use:'Commonly prescribed for high blood pressure, fast heart rate, heart failure, chest pain, or after a heart attack.'};
+ if(has('lisinopril','enalapril','benazepril','ramipril','ace inhibitor'))
+  return {cls:'ACE inhibitor (blood pressure medicine)',moa:'Relaxes blood vessels and lowers blood pressure.',use:'Commonly prescribed for high blood pressure, heart failure, or kidney protection in some patients.'};
+ if(has('losartan','valsartan','irbesartan','candesartan','olmesartan','angiotensin ii receptor blocker','arb'))
+  return {cls:'ARB (blood pressure medicine)',moa:'Relaxes blood vessels and lowers blood pressure.',use:'Commonly prescribed for high blood pressure, heart failure, or kidney protection in some patients.'};
+ if(has('amlodipine','diltiazem','verapamil','nifedipine','calcium channel blocker'))
+  return {cls:'Calcium channel blocker',moa:'Relaxes blood vessels; some drugs in this group also slow the heart rate.',use:'Commonly prescribed for high blood pressure, chest pain, or certain fast heart rhythms.'};
+ if(has('atorvastatin','lipitor','rosuvastatin','crestor','simvastatin','pravastatin','statin','hmg-coa reductase inhibitor'))
+  return {cls:'Cholesterol medicine (statin)',moa:'Lowers cholesterol made by the liver.',use:'Prescribed to lower cholesterol and reduce the risk of heart attack and stroke.'};
+ if(has('furosemide','lasix','bumetanide','bumex','torsemide','hydrochlorothiazide','chlorthalidone','diuretic'))
+  return {cls:'Water pill (diuretic)',moa:'Helps the kidneys remove extra salt and water from the body.',use:'Commonly prescribed for swelling/fluid buildup, heart failure, or high blood pressure.'};
+ if(has('metformin','biguanide'))
+  return {cls:'Diabetes medicine',moa:'Lowers the amount of sugar released by the liver and helps the body use insulin better.',use:'Most often prescribed for type 2 diabetes.'};
+ if(has('insulin'))
+  return {cls:'Insulin (diabetes medicine)',moa:'Moves glucose from the blood into cells and lowers blood sugar.',use:'Prescribed for diabetes to control high blood sugar.'};
+ if(has('glipizide','glyburide','glimepiride','sulfonylurea'))
+  return {cls:'Diabetes medicine (sulfonylurea)',moa:'Causes the pancreas to release more insulin.',use:'Prescribed for type 2 diabetes. It can cause low blood sugar.'};
+ if(has('sertraline','zoloft','fluoxetine','prozac','escitalopram','lexapro','citalopram','paroxetine','ssri','selective serotonin reuptake inhibitor'))
+  return {cls:'Antidepressant (SSRI)',moa:'Increases serotonin activity in the brain.',use:'Commonly prescribed for depression, anxiety, PTSD, panic disorder, or OCD.'};
+ if(has('venlafaxine','effexor','duloxetine','cymbalta','desvenlafaxine','snri'))
+  return {cls:'Antidepressant (SNRI)',moa:'Increases serotonin and norepinephrine activity in the brain.',use:'Commonly prescribed for depression or anxiety; some are also used for nerve pain.'};
+ if(has('alprazolam','xanax','lorazepam','ativan','clonazepam','klonopin','diazepam','valium','benzodiazepine'))
+  return {cls:'Sedative / anxiety medicine (benzodiazepine)',moa:'Slows activity in the brain and nervous system.',use:'Commonly prescribed for anxiety, panic attacks, seizures, or muscle spasms, depending on the drug.'};
+ if(has('gabapentin','neurontin','pregabalin','lyrica'))
+  return {cls:'Nerve pain / seizure medicine',moa:'Reduces overactive nerve signaling.',use:'Often prescribed for nerve pain or seizures; sometimes used for other chronic pain conditions.'};
+ if(has('levetiracetam','keppra','lamotrigine','lamictal','phenytoin','dilantin','valproate','divalproex','depako','antiepileptic','anticonvulsant'))
+  return {cls:'Seizure medicine (anticonvulsant)',moa:'Helps calm abnormal electrical activity in the brain.',use:'Usually prescribed to prevent seizures; some drugs in this group are also used for mood disorders or migraines.'};
+ if(has('omeprazole','prilosec','pantoprazole','protonix','esomeprazole','nexium','proton pump inhibitor'))
+  return {cls:'Acid reducer (PPI)',moa:'Reduces acid made by the stomach.',use:'Commonly prescribed for acid reflux/GERD, ulcers, or stomach irritation.'};
+ if(has('levothyroxine','synthroid','thyroid hormone'))
+  return {cls:'Thyroid hormone replacement',moa:'Replaces thyroid hormone the body is not making enough of.',use:'Prescribed for an underactive thyroid (hypothyroidism).'};
+ if(has('albuterol','ventolin','proair','bronchodilator','beta2-adrenergic agonist'))
+  return {cls:'Rescue inhaler / bronchodilator',moa:'Relaxes airway muscles to open the lungs.',use:'Used for wheezing or shortness of breath from asthma, COPD, or bronchospasm.'};
+ if(has('prednisone','prednisolone','methylprednisolone','corticosteroid','glucocorticoid'))
+  return {cls:'Steroid (corticosteroid)',moa:'Reduces inflammation and immune-system activity.',use:'Used for many inflammatory or allergic conditions, including asthma/COPD flare-ups.'};
+ if(has('nitroglycerin','nitrate'))
+  return {cls:'Nitrate / chest-pain medicine',moa:'Widens blood vessels, which lowers the heart’s workload and can improve blood flow.',use:'Commonly prescribed for angina/chest pain; some forms are used for heart failure.'};
+ if(has('digoxin','cardiac glycoside'))
+  return {cls:'Heart-rate / heart-strength medicine (digoxin)',moa:'Slows electrical conduction through the AV node and can increase the strength of heart contractions.',use:'Used in some patients with atrial fibrillation or heart failure.'};
+ return null;
+}
+function patientMedFallbackUse(label){
+ const raw=patientMedTrim(label?.indications_and_usage||label?.purpose||'',500);
+ if(!raw)return 'Common use information was not available for this medication.';
+ const first=raw.split(/(?<=[.!?])\s+/)[0];
+ return first.length>260?first.slice(0,260).trim()+'…':first;
+}
+
 async function loadPatientMedication(rxcui,fallbackName){
  const host=document.querySelector('#patientMedResult');host.innerHTML='<div class="patient-med-card"><b>Loading medication summary…</b></div>';
  let props=null,label=null,ingredientName='';
@@ -251,18 +307,20 @@ async function loadPatientMedication(rxcui,fallbackName){
    }
   }catch(e){}
  }
- const drugClass=[...new Set(classParts)].join(' • ')||'Drug class information was not available for this medication.';
+ const technicalClass=[...new Set(classParts)].join(' • ');
  const moaParts=[...(label?.openfda?.pharm_class_moa||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
- const mechanism=patientMedTrim(label?.mechanism_of_action||(moaParts.length?moaParts.join(' • '):'Mechanism of action was not available from the matched FDA label.'),700);
- const indication=patientMedTrim(label?.indications_and_usage||label?.purpose||'Indication information was not available from the matched FDA label.',800);
+ const plain=patientMedPlainSummary(name,classParts,label);
+ const drugClass=plain?.cls||(technicalClass||'Drug class information was not available for this medication.');
+ const mechanism=plain?.moa||patientMedTrim(label?.mechanism_of_action||(moaParts.length?moaParts.join(' • '):'Mechanism information was not available for this medication.'),360);
+ const indication=plain?.use||patientMedFallbackUse(label);
  const dailymed='https://dailymed.nlm.nih.gov/dailymed/search.cfm?query='+encodeURIComponent(name);
  const rxnav='https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm='+encodeURIComponent(rxcui);
  host.innerHTML='<div class="patient-med-card"><h3>'+esc(name)+'</h3>'
    +(generic?'<div class="meta"><b>Generic:</b> '+esc(generic)+'</div>':'')
    +(brand?'<div class="meta"><b>Brand:</b> '+esc(brand)+'</div>':'')
-   +'<div class="patient-med-label">Drug class</div><div class="patient-med-copy">'+esc(drugClass)+'</div>'
-   +'<div class="patient-med-label">Mechanism of action</div><div class="patient-med-copy">'+esc(mechanism)+'</div>'
-   +'<div class="patient-med-label">What it is prescribed for</div><div class="patient-med-copy">'+esc(indication)+'</div>'
+   +'<div class="patient-med-label">What kind of medicine is it?</div><div class="patient-med-copy"><b>'+esc(drugClass)+'</b></div>'
+   +'<div class="patient-med-label">How does it work?</div><div class="patient-med-copy">'+esc(mechanism)+'</div>'
+   +'<div class="patient-med-label">Why would a patient take it?</div><div class="patient-med-copy">'+esc(indication)+'</div>'
    +'<div class="patient-med-links"><a class="patient-med-link" target="_blank" rel="noopener" href="'+dailymed+'">Detailed FDA / DailyMed Info ↗</a><a class="patient-med-link" target="_blank" rel="noopener" href="'+rxnav+'">RxNorm Drug Record ↗</a></div>'
    +'<div class="patient-med-warning" style="margin-top:12px"><b>Field reference:</b> This section is for identifying and understanding a patient\'s home medication. It is not a treatment recommendation. Follow PVFire protocols and Medical Control for EMS care.</div></div>';
 }
