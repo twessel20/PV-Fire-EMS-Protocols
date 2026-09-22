@@ -208,105 +208,47 @@ async function lookupPatientMedication(){
 function patientMedPlainSummary(name,classes,label){
  const hay=[name,(classes||[]).join(' '),(label?.openfda?.generic_name||[]).join(' '),(label?.openfda?.brand_name||[]).join(' ')].join(' ').toLowerCase();
  const has=(...xs)=>xs.some(x=>hay.includes(x));
- if(has('warfarin','apixaban','eliquis','rivaroxaban','xarelto','dabigatran','pradaxa','edoxaban','savaysa','anticoagulant','factor xa inhibitor','vitamin k antagonist','direct thrombin inhibitor'))
-  return {cls:'Blood thinner (anticoagulant)',moa:'Makes it harder for the blood to form clots.',use:'Often prescribed to prevent or treat blood clots, including DVT/PE, and to lower stroke risk in atrial fibrillation.'};
- if(has('clopidogrel','plavix','ticagrelor','brilinta','prasugrel','effient','antiplatelet'))
-  return {cls:'Antiplatelet / blood thinner',moa:'Makes platelets less sticky so clots are less likely to form.',use:'Often prescribed after a heart attack, stroke, or coronary stent, or for other artery disease.'};
- if(has('metoprolol','atenolol','carvedilol','propranolol','beta blocker','beta-blocker'))
-  return {cls:'Beta blocker',moa:'Slows the heart and reduces how hard it has to work.',use:'Commonly prescribed for high blood pressure, fast heart rate, heart failure, chest pain, or after a heart attack.'};
- if(has('lisinopril','enalapril','benazepril','ramipril','ace inhibitor'))
-  return {cls:'ACE inhibitor (blood pressure medicine)',moa:'Relaxes blood vessels and lowers blood pressure.',use:'Commonly prescribed for high blood pressure, heart failure, or kidney protection in some patients.'};
- if(has('losartan','valsartan','irbesartan','candesartan','olmesartan','angiotensin ii receptor blocker','arb'))
-  return {cls:'ARB (blood pressure medicine)',moa:'Relaxes blood vessels and lowers blood pressure.',use:'Commonly prescribed for high blood pressure, heart failure, or kidney protection in some patients.'};
- if(has('amlodipine','diltiazem','verapamil','nifedipine','calcium channel blocker'))
-  return {cls:'Calcium channel blocker',moa:'Relaxes blood vessels; some drugs in this group also slow the heart rate.',use:'Commonly prescribed for high blood pressure, chest pain, or certain fast heart rhythms.'};
- if(has('atorvastatin','lipitor','rosuvastatin','crestor','simvastatin','pravastatin','statin','hmg-coa reductase inhibitor'))
-  return {cls:'Cholesterol medicine (statin)',moa:'Lowers cholesterol made by the liver.',use:'Prescribed to lower cholesterol and reduce the risk of heart attack and stroke.'};
- if(has('furosemide','lasix','bumetanide','bumex','torsemide','hydrochlorothiazide','chlorthalidone','diuretic'))
-  return {cls:'Water pill (diuretic)',moa:'Helps the kidneys remove extra salt and water from the body.',use:'Commonly prescribed for swelling/fluid buildup, heart failure, or high blood pressure.'};
- if(has('metformin','biguanide'))
-  return {cls:'Diabetes medicine',moa:'Lowers the amount of sugar released by the liver and helps the body use insulin better.',use:'Most often prescribed for type 2 diabetes.'};
- if(has('insulin'))
-  return {cls:'Insulin (diabetes medicine)',moa:'Moves glucose from the blood into cells and lowers blood sugar.',use:'Prescribed for diabetes to control high blood sugar.'};
- if(has('glipizide','glyburide','glimepiride','sulfonylurea'))
-  return {cls:'Diabetes medicine (sulfonylurea)',moa:'Causes the pancreas to release more insulin.',use:'Prescribed for type 2 diabetes. It can cause low blood sugar.'};
- if(has('sertraline','zoloft','fluoxetine','prozac','escitalopram','lexapro','citalopram','paroxetine','ssri','selective serotonin reuptake inhibitor'))
-  return {cls:'Antidepressant (SSRI)',moa:'Increases serotonin activity in the brain.',use:'Commonly prescribed for depression, anxiety, PTSD, panic disorder, or OCD.'};
- if(has('venlafaxine','effexor','duloxetine','cymbalta','desvenlafaxine','snri'))
-  return {cls:'Antidepressant (SNRI)',moa:'Increases serotonin and norepinephrine activity in the brain.',use:'Commonly prescribed for depression or anxiety; some are also used for nerve pain.'};
- if(has('alprazolam','xanax','lorazepam','ativan','clonazepam','klonopin','diazepam','valium','benzodiazepine'))
-  return {cls:'Sedative / anxiety medicine (benzodiazepine)',moa:'Slows activity in the brain and nervous system.',use:'Commonly prescribed for anxiety, panic attacks, seizures, or muscle spasms, depending on the drug.'};
- if(has('gabapentin','neurontin','pregabalin','lyrica'))
-  return {cls:'Nerve pain / seizure medicine',moa:'Reduces overactive nerve signaling.',use:'Often prescribed for nerve pain or seizures; sometimes used for other chronic pain conditions.'};
- if(has('levetiracetam','keppra','lamotrigine','lamictal','phenytoin','dilantin','valproate','divalproex','depako','antiepileptic','anticonvulsant'))
-  return {cls:'Seizure medicine (anticonvulsant)',moa:'Helps calm abnormal electrical activity in the brain.',use:'Usually prescribed to prevent seizures; some drugs in this group are also used for mood disorders or migraines.'};
- if(has('omeprazole','prilosec','pantoprazole','protonix','esomeprazole','nexium','proton pump inhibitor'))
-  return {cls:'Acid reducer (PPI)',moa:'Reduces acid made by the stomach.',use:'Commonly prescribed for acid reflux/GERD, ulcers, or stomach irritation.'};
- if(has('levothyroxine','synthroid','thyroid hormone'))
-  return {cls:'Thyroid hormone replacement',moa:'Replaces thyroid hormone the body is not making enough of.',use:'Prescribed for an underactive thyroid (hypothyroidism).'};
- if(has('albuterol','ventolin','proair','bronchodilator','beta2-adrenergic agonist'))
-  return {cls:'Rescue inhaler / bronchodilator',moa:'Relaxes airway muscles to open the lungs.',use:'Used for wheezing or shortness of breath from asthma, COPD, or bronchospasm.'};
- if(has('prednisone','prednisolone','methylprednisolone','corticosteroid','glucocorticoid'))
-  return {cls:'Steroid (corticosteroid)',moa:'Reduces inflammation and immune-system activity.',use:'Used for many inflammatory or allergic conditions, including asthma/COPD flare-ups.'};
- if(has('nitroglycerin','nitrate'))
-  return {cls:'Nitrate / chest-pain medicine',moa:'Widens blood vessels, which lowers the heart’s workload and can improve blood flow.',use:'Commonly prescribed for angina/chest pain; some forms are used for heart failure.'};
- if(has('digoxin','cardiac glycoside'))
-  return {cls:'Heart-rate / heart-strength medicine (digoxin)',moa:'Slows electrical conduction through the AV node and can increase the strength of heart contractions.',use:'Used in some patients with atrial fibrillation or heart failure.'};
- const cls=(classes||[]).join(' ').toLowerCase();
- if(/opioid|opiate/.test(cls)) return {cls:'Opioid pain medicine',moa:'Changes how the brain and nervous system feel and respond to pain.',use:patientMedPlainUse(label,'Often prescribed for moderate to severe pain.')};
- if(/nonsteroidal anti-inflammatory|nsaid/.test(cls)) return {cls:'Pain / inflammation medicine (NSAID)',moa:'Reduces chemicals that cause pain and inflammation.',use:patientMedPlainUse(label,'Often used for pain, inflammation, fever, or arthritis.')};
- if(/antihistamine/.test(cls)) return {cls:'Allergy medicine (antihistamine)',moa:'Blocks histamine, a chemical involved in allergic reactions.',use:patientMedPlainUse(label,'Commonly used for allergies, itching, or other allergic symptoms.')};
- if(/antibiotic|antibacterial|penicillin|cephalosporin|macrolide|fluoroquinolone/.test(cls)) return {cls:'Antibiotic',moa:'Kills bacteria or stops them from growing.',use:patientMedPlainUse(label,'Prescribed to treat a bacterial infection.')};
- if(/antipsychotic/.test(cls)) return {cls:'Antipsychotic / mood medicine',moa:'Changes the activity of certain brain chemicals.',use:patientMedPlainUse(label,'May be prescribed for schizophrenia, bipolar disorder, severe agitation, or other mental-health conditions.')};
- if(/central nervous system stimulant|stimulant/.test(cls)) return {cls:'Stimulant',moa:'Increases activity in parts of the brain and nervous system.',use:patientMedPlainUse(label,'Often prescribed for ADHD or narcolepsy.')};
- if(/muscle relaxant/.test(cls)) return {cls:'Muscle relaxer',moa:'Reduces muscle spasm or muscle overactivity.',use:patientMedPlainUse(label,'Often prescribed for painful muscle spasms or muscle tightness.')};
- if(/alpha.*blocker|alpha-1.*antagonist/.test(cls)) return {cls:'Alpha blocker',moa:'Relaxes certain muscles and blood vessels.',use:patientMedPlainUse(label,'Often prescribed for an enlarged prostate or high blood pressure.')};
- if(/phosphodiesterase.*5|pde.?5/.test(cls)) return {cls:'Erectile-dysfunction / blood-vessel medicine',moa:'Relaxes blood vessels and increases blood flow.',use:patientMedPlainUse(label,'Commonly prescribed for erectile dysfunction or pulmonary hypertension.')};
- if(/glp-1|glucagon-like peptide/.test(cls)) return {cls:'Diabetes / weight-loss medicine (GLP-1)',moa:'Helps control blood sugar, slows stomach emptying, and can reduce appetite.',use:patientMedPlainUse(label,'Often prescribed for type 2 diabetes and, for some drugs, weight management.')};
- if(/sglt.?2|sodium-glucose cotransporter/.test(cls)) return {cls:'Diabetes medicine (SGLT2 inhibitor)',moa:'Helps the kidneys remove extra sugar through the urine.',use:patientMedPlainUse(label,'Commonly prescribed for type 2 diabetes; some are also used for heart failure or kidney disease.')};
- if(/dpp.?4|dipeptidyl peptidase/.test(cls)) return {cls:'Diabetes medicine (DPP-4 inhibitor)',moa:'Helps the body release insulin when blood sugar is high.',use:patientMedPlainUse(label,'Prescribed for type 2 diabetes.')};
- if(/h2.*blocker|histamine h2/.test(cls)) return {cls:'Acid reducer (H2 blocker)',moa:'Reduces the amount of acid made by the stomach.',use:patientMedPlainUse(label,'Commonly used for heartburn, acid reflux, or ulcers.')};
- if(/antiarrhythmic/.test(cls)) return {cls:'Heart-rhythm medicine',moa:'Changes electrical activity in the heart to help control abnormal rhythms.',use:patientMedPlainUse(label,'Prescribed for certain abnormal heart rhythms.')};
- if(/antiemetic/.test(cls)) return {cls:'Nausea medicine (antiemetic)',moa:'Blocks signals that can trigger nausea and vomiting.',use:patientMedPlainUse(label,'Used to prevent or treat nausea and vomiting.')};
- if(/anticholinergic/.test(cls)) return {cls:'Anticholinergic medicine',moa:'Blocks certain nerve signals in the body.',use:patientMedPlainUse(label,'Used for several conditions depending on the drug, such as bladder problems, breathing problems, or movement symptoms.')};
- if(/leukotriene/.test(cls)) return {cls:'Asthma / allergy medicine',moa:'Blocks chemicals that contribute to airway swelling and allergy symptoms.',use:patientMedPlainUse(label,'Commonly prescribed for asthma or allergies.')};
- if(/opioid antagonist/.test(cls)) return {cls:'Opioid blocker',moa:'Blocks the effects of opioid drugs.',use:patientMedPlainUse(label,'Used to reverse or block opioid effects.')};
- return null;
-}
-function patientMedPlainUse(label,fallback){
- const raw=String((label?.indications_and_usage||label?.purpose||[])[0]||label?.indications_and_usage||label?.purpose||'').toLowerCase();
- if(!raw)return fallback;
- if(/hypertension|high blood pressure/.test(raw))return 'Commonly prescribed for high blood pressure.';
- if(/heart failure|congestive heart failure/.test(raw))return 'Commonly prescribed for heart failure.';
- if(/atrial fibrillation|afib|a-fib/.test(raw))return 'Commonly prescribed for atrial fibrillation or to reduce stroke risk.';
- if(/diabetes|glycemic|blood glucose/.test(raw))return 'Prescribed to help control diabetes and high blood sugar.';
- if(/depression|depressive/.test(raw))return 'Commonly prescribed for depression.';
- if(/anxiety|panic disorder/.test(raw))return 'Commonly prescribed for anxiety or panic disorder.';
- if(/seizure|epilep/.test(raw))return 'Prescribed to prevent or control seizures.';
- if(/neuropath|nerve pain/.test(raw))return 'Often prescribed for nerve pain.';
- if(/pain|analges/.test(raw))return 'Used to treat pain.';
- if(/infection|bacterial/.test(raw))return 'Prescribed to treat a bacterial infection.';
- if(/gastroesophageal|gerd|acid reflux|heartburn/.test(raw))return 'Used for acid reflux, heartburn, or related stomach-acid problems.';
- if(/asthma/.test(raw)&&/copd|chronic obstructive/.test(raw))return 'Used to help control asthma or COPD symptoms.';
- if(/asthma/.test(raw))return 'Used to prevent or treat asthma symptoms.';
- if(/copd|chronic obstructive/.test(raw))return 'Used to help control COPD symptoms.';
- if(/hyperlipid|cholesterol/.test(raw))return 'Prescribed to lower cholesterol and reduce cardiovascular risk.';
- if(/benign prostatic|bph|enlarged prostate/.test(raw))return 'Commonly prescribed for an enlarged prostate and urinary symptoms.';
- if(/erectile dysfunction/.test(raw))return 'Commonly prescribed for erectile dysfunction.';
- if(/osteoporosis/.test(raw))return 'Prescribed to strengthen bones and reduce fracture risk from osteoporosis.';
- if(/nausea|vomit/.test(raw))return 'Used to prevent or treat nausea and vomiting.';
- if(/allerg|rhinitis|urticaria/.test(raw))return 'Used for allergies or allergic symptoms.';
- return fallback;
-}
-function patientMedFallbackUse(label){
- const raw=String((label?.indications_and_usage||label?.purpose||[])[0]||label?.indications_and_usage||label?.purpose||'').toLowerCase();
- if(!raw)return 'Common use information was not available for this medication.';
- return patientMedPlainUse(label,'See the detailed drug reference for its common uses.');
-}
- const raw=patientMedTrim(label?.indications_and_usage||label?.purpose||'',500);
- if(!raw)return 'Common use information was not available for this medication.';
- const first=raw.split(/(?<=[.!?])\s+/)[0];
- return first.length>260?first.slice(0,260).trim()+'…':first;
+
+ const rules=[
+  {m:['warfarin','coumadin','apixaban','eliquis','rivaroxaban','xarelto','dabigatran','pradaxa','edoxaban','savaysa','anticoagulant','factor xa inhibitor','vitamin k antagonist','direct thrombin inhibitor'],v:['Blood thinner','Helps prevent harmful blood clots from forming.','Used to prevent or treat blood clots and to lower stroke risk in some heart-rhythm patients.']},
+  {m:['clopidogrel','plavix','ticagrelor','brilinta','prasugrel','effient','antiplatelet'],v:['Blood thinner / antiplatelet','Makes platelets less sticky so clots are less likely to form.','Often used after a heart attack, stroke, or heart stent.']},
+  {m:['metoprolol','atenolol','carvedilol','propranolol','beta blocker','beta-blocker'],v:['Heart / blood pressure medicine','Slows the heart and lowers how hard it has to work.','Used for high blood pressure, fast heart rate, heart failure, chest pain, or after a heart attack.']},
+  {m:['lisinopril','enalapril','benazepril','ramipril','ace inhibitor','losartan','valsartan','irbesartan','candesartan','olmesartan','angiotensin ii receptor blocker','arb'],v:['Blood pressure medicine','Relaxes blood vessels and lowers blood pressure.','Used for high blood pressure and sometimes heart failure or kidney protection.']},
+  {m:['amlodipine','diltiazem','verapamil','nifedipine','calcium channel blocker'],v:['Blood pressure / heart medicine','Relaxes blood vessels. Some drugs in this group also slow the heart.','Used for high blood pressure, chest pain, or some fast heart rhythms.']},
+  {m:['atorvastatin','lipitor','rosuvastatin','crestor','simvastatin','pravastatin','statin','hmg-coa'],v:['Cholesterol medicine','Lowers cholesterol made by the liver.','Used to lower cholesterol and reduce heart attack and stroke risk.']},
+  {m:['furosemide','lasix','bumetanide','bumex','torsemide','hydrochlorothiazide','chlorthalidone','diuretic'],v:['Water pill','Helps the body get rid of extra salt and water.','Used for swelling, fluid overload, heart failure, or high blood pressure.']},
+  {m:['metformin','biguanide'],v:['Diabetes medicine','Helps lower blood sugar.','Used mainly for type 2 diabetes.']},
+  {m:['insulin'],v:['Insulin / diabetes medicine','Lowers blood sugar by helping glucose move into cells.','Used to control diabetes.']},
+  {m:['glipizide','glyburide','glimepiride','sulfonylurea'],v:['Diabetes medicine','Helps the pancreas release more insulin.','Used for type 2 diabetes. Can cause low blood sugar.']},
+  {m:['semaglutide','ozempic','wegovy','rybelsus','tirzepatide','mounjaro','zepbound','liraglutide','victoza','saxenda','glp-1'],v:['Diabetes / weight-loss medicine','Helps control blood sugar and can reduce appetite.','Used for type 2 diabetes and, for some drugs, weight loss.']},
+  {m:['empagliflozin','jardiance','dapagliflozin','farxiga','canagliflozin','invokana','sglt'],v:['Diabetes medicine','Helps the kidneys remove extra sugar in the urine.','Used for type 2 diabetes; some are also used for heart failure or kidney disease.']},
+  {m:['sertraline','zoloft','fluoxetine','prozac','escitalopram','lexapro','citalopram','paroxetine','ssri'],v:['Antidepressant','Changes serotonin activity in the brain.','Used for depression, anxiety, panic disorder, PTSD, or OCD.']},
+  {m:['venlafaxine','effexor','duloxetine','cymbalta','desvenlafaxine','snri'],v:['Antidepressant','Changes serotonin and norepinephrine activity in the brain.','Used for depression or anxiety; some are also used for nerve pain.']},
+  {m:['alprazolam','xanax','lorazepam','ativan','clonazepam','klonopin','diazepam','valium','benzodiazepine'],v:['Sedative / anxiety medicine','Slows brain and nervous-system activity.','Used for anxiety, panic attacks, seizures, or muscle spasms.']},
+  {m:['gabapentin','neurontin','pregabalin','lyrica'],v:['Nerve pain / seizure medicine','Calms overactive nerve signals.','Used for nerve pain or seizures.']},
+  {m:['levetiracetam','keppra','lamotrigine','lamictal','phenytoin','dilantin','valproate','divalproex','depako','antiepileptic','anticonvulsant'],v:['Seizure medicine','Helps prevent abnormal electrical activity in the brain.','Used mainly to prevent seizures.']},
+  {m:['omeprazole','prilosec','pantoprazole','protonix','esomeprazole','nexium','proton pump inhibitor'],v:['Stomach acid medicine','Reduces the amount of acid the stomach makes.','Used for acid reflux, GERD, ulcers, or stomach irritation.']},
+  {m:['famotidine','pepcid','h2 blocker','histamine h2'],v:['Stomach acid medicine','Reduces the amount of acid the stomach makes.','Used for heartburn, reflux, or ulcers.']},
+  {m:['levothyroxine','synthroid','thyroid hormone'],v:['Thyroid medicine','Replaces thyroid hormone the body is missing.','Used for an underactive thyroid.']},
+  {m:['albuterol','ventolin','proair','bronchodilator','beta2-adrenergic agonist'],v:['Rescue inhaler','Opens the airways so it is easier to breathe.','Used for wheezing or shortness of breath from asthma or COPD.']},
+  {m:['prednisone','prednisolone','methylprednisolone','corticosteroid','glucocorticoid'],v:['Steroid','Reduces inflammation and immune-system activity.','Used for asthma/COPD flare-ups, allergies, and many inflammatory problems.']},
+  {m:['nitroglycerin','nitrate'],v:['Chest-pain / heart medicine','Widens blood vessels and lowers the heart’s workload.','Used for angina or chest pain; some forms are also used for heart failure.']},
+  {m:['digoxin','cardiac glycoside'],v:['Heart medicine','Can slow the heart rate and help the heart pump more strongly.','Used in some patients with atrial fibrillation or heart failure.']},
+  {m:['amiodarone','sotalol','flecainide','propafenone','antiarrhythmic'],v:['Heart-rhythm medicine','Helps control abnormal electrical activity in the heart.','Used for certain abnormal heart rhythms.']},
+  {m:['amoxicillin','augmentin','azithromycin','zithromax','doxycycline','cephalexin','keflex','ciprofloxacin','clindamycin','antibiotic','antibacterial'],v:['Antibiotic','Kills bacteria or stops them from growing.','Used to treat bacterial infections.']},
+  {m:['hydrocodone','oxycodone','morphine','fentanyl','tramadol','opioid','opiate'],v:['Opioid pain medicine','Changes how the brain and nervous system feel pain.','Used for moderate to severe pain.']},
+  {m:['ibuprofen','naproxen','meloxicam','celecoxib','nsaid','nonsteroidal anti-inflammatory'],v:['Pain / inflammation medicine','Reduces pain and inflammation.','Used for pain, arthritis, inflammation, or fever.']},
+  {m:['acetaminophen','tylenol'],v:['Pain / fever medicine','Helps reduce pain and fever.','Used for pain or fever.']},
+  {m:['diphenhydramine','benadryl','cetirizine','zyrtec','loratadine','claritin','fexofenadine','allegra','antihistamine'],v:['Allergy medicine','Blocks histamine, which causes many allergy symptoms.','Used for allergies, itching, or hives.']},
+  {m:['ondansetron','zofran','promethazine','phenergan','antiemetic'],v:['Nausea medicine','Blocks signals that can trigger nausea and vomiting.','Used to prevent or treat nausea and vomiting.']},
+  {m:['tamsulosin','flomax','alpha blocker'],v:['Prostate / blood pressure medicine','Relaxes certain muscles and blood vessels.','Often used for an enlarged prostate; some drugs in this group also treat high blood pressure.']},
+  {m:['sildenafil','viagra','tadalafil','cialis','pde5','phosphodiesterase'],v:['Erectile dysfunction / blood-vessel medicine','Relaxes blood vessels and increases blood flow.','Used for erectile dysfunction or pulmonary hypertension.']},
+  {m:['montelukast','singulair','leukotriene'],v:['Asthma / allergy medicine','Blocks chemicals that can cause airway swelling and allergy symptoms.','Used to help control asthma or allergies.']},
+  {m:['adderall','amphetamine','methylphenidate','ritalin','vyvanse','lisdexamfetamine','stimulant'],v:['Stimulant / ADHD medicine','Increases activity in parts of the brain and nervous system.','Used for ADHD or narcolepsy.']},
+  {m:['quetiapine','seroquel','olanzapine','zyprexa','risperidone','risperdal','aripiprazole','abilify','antipsychotic'],v:['Mood / psychiatric medicine','Changes the activity of certain brain chemicals.','Used for conditions such as bipolar disorder, schizophrenia, or severe mood symptoms.']}
+ ];
+ for(const r of rules) if(has(...r.m)) return {cls:r.v[0],moa:r.v[1],use:r.v[2]};
+ return {cls:'Prescription medicine',moa:'See the detailed drug reference if you need more information about how it works.',use:'See the detailed drug reference if you need more information about why it is prescribed.'};
 }
 
 async function loadPatientMedication(rxcui,fallbackName){
