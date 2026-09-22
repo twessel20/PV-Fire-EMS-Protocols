@@ -674,7 +674,7 @@ function pediatricVitalsCard(){
   ['6–12 years','60–110','SBP 100–120 / DBP 60–75','16–22'],
   ['> 12 years','60–100','SBP 110–135 / DBP 65–85','12–20']
  ];
- return '<div class="peds-vitals-card"><div class="section">GENERAL VITAL SIGNS AND GUIDELINES</div><div class="vitals-scroll"><table class="vitals-table"><thead><tr><th>Age</th><th>Heart Rate<br><small>(beats/min)</small></th><th>Blood Pressure<br><small>(mmHg)</small></th><th>Respiratory Rate<br><small>(breaths/min)</small></th></tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div class="notice">PVFIRE Pediatric Vital Sign Ranges by Age — protocol page 144.</div></div>';
+ return '<div class="peds-vitals-card"><div class="section">GENERAL VITAL SIGNS AND GUIDELINES</div><div class="vitals-scroll"><table class="vitals-table"><thead><tr><th>Age</th><th>Heart Rate<br><small>(beats/min)</small></th><th>Blood Pressure<br><small>(mmHg)</small></th><th>Respiratory Rate<br><small>(breaths/min)</small></th></tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div class="notice">PVFIRE Pediatric Vital Sign Ranges by Age — printed protocol page 144.</div></div>';
 }
 function formatTcdQuickReference(x){
  const groups=[
