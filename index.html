@@ -26,6 +26,11 @@ body{background:#f4f7fa}
 .related-box a,.related-link{color:#245f8c}
 .protocol-mode.bls,.protocol-mode.als{color:#173a5e}
 .back{color:#173a5e}
+
+.tool-menu{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.tool-launch{width:100%;display:grid;grid-template-columns:46px 1fr 20px;align-items:center;gap:10px;text-align:left;background:#fff;border:1px solid #d8e3ec;border-radius:14px;padding:15px;color:#1f2937;box-shadow:0 1px 3px #0000000d;cursor:pointer}
+.tool-launch-icon{width:42px;height:42px;border-radius:10px;background:#eef4f8;color:#173a5e;display:grid;place-items:center;font-size:20px;font-weight:900}
+.tool-launch b{display:block;color:#173a5e;font-size:16px}.tool-launch small{display:block;color:#64748b;font-size:12px;line-height:1.35;margin-top:3px}.tool-chevron{font-size:28px;color:#64748b}.tool-back{margin:0 0 10px}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -113,68 +118,54 @@ function relatedAppendixHtml(x){
 
 function renderTools(){
   document.querySelector('#list').innerHTML=`
-    <div class="tools-grid">
-      <div class="tool-card">
-        <h3>Lidocaine — Adult Cardiac Arrest</h3>
-        <div class="tool-note"><b>VF/pulseless VT:</b> PVFIRE calculator uses <b>1.0 mg/kg IV/IO</b> for the initial dose, with <b>no maximum dose cap</b>. Enter weight in pounds or kilograms.</div>
-        <input id="lidoWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
-        <select id="lidoUnit" class="tool-input">
-          <option value="lb">lb</option>
-          <option value="kg">kg</option>
-        </select>
-        <button class="tool-btn" onclick="calcLido()">Calculate Lidocaine Dose</button>
-        <div id="lidoResult" class="tool-result" style="display:none"></div>
-        <div class="tool-note" style="margin-top:10px">AHA-based cardiac arrest tool. The 2025 AHA adult cardiac arrest algorithm lists lidocaine 1–1.5 mg/kg IV/IO for the first dose; this calculator intentionally uses the department-selected 1.0 mg/kg value.</div>
-      </div>
-      <div class="tool-card">
-        <h3>Dopamine Gravity-Drip Calculator</h3>
-        <div class="tool-note">Gravity tubing only — no pump output. Enter the ordered dose and the actual bag concentration, then choose a 10 or 60 gtt/mL set.</div>
-        <input id="dopWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
-        <select id="dopWeightUnit" class="tool-input">
-          <option value="lb">lb</option>
-          <option value="kg">kg</option>
-        </select>
-        <input id="dopDose" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Ordered dose (mcg/kg/min)">
-        <input id="dopMg" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Dopamine in bag (mg)">
-        <input id="dopMl" class="tool-input" inputmode="decimal" type="number" min="0" step="1" placeholder="Total bag volume (mL)">
-        <select id="dopGtt" class="tool-input">
-          <option value="10">10 gtt/mL tubing</option>
-          <option value="60">60 gtt/mL tubing</option>
-        </select>
-        <button class="tool-btn" onclick="calcDopamine()">Calculate gtt/min</button>
-        <div id="dopResult" class="tool-result" style="display:none"></div>
-        <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose × weight kg × drop factor) ÷ concentration (mcg/mL).</div>
-      </div>
-      <div class="tool-card">
-        <h3>Burn TBSA — Rule of Nines</h3>
-        <div class="tool-note">Tap burned regions on the generic front/back anatomy map. Choose the age group first; pediatric proportions are adjusted.</div>
-        <div class="burn-age">
-          <button id="burnAdult" class="on" onclick="setBurnAge('adult')">Adult</button>
-          <button id="burnChild" onclick="setBurnAge('child')">Child</button>
-          <button id="burnInfant" onclick="setBurnAge('infant')">Infant</button>
-        </div>
-        <div id="burnMap" class="burn-map"></div>
-        <div class="tbsa-sticky"><span>Estimated TBSA</span><b id="burnTotal">0%</b></div>
-        <button class="tool-btn" style="background:#475569" onclick="resetBurn()">Clear Burn Map</button>
-        <div class="tool-result">
-          <div class="tool-note">Tap a body surface again to remove it.</div>
-          <div class="burn-mini">For small/scattered areas, the patient's palm including fingers is approximately 1% TBSA. Use the official protocol/source when exact burn classification or destination criteria are needed.</div>
-        </div>
-        <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:14px">
-          <h3 style="font-size:17px">Parkland Burn Volume</h3>
-          <div class="tool-note">Uses the TBSA selected above. Enter patient weight to estimate total crystalloid volume for the first 24 hours.</div>
-          <input id="burnWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
-          <select id="burnWeightUnit" class="tool-input">
-            <option value="lb">lb</option>
-            <option value="kg">kg</option>
-          </select>
-          <button class="tool-btn" onclick="calcParkland()">Calculate Burn Fluid Volume</button>
-          <div id="parklandResult" class="tool-result" style="display:none"></div>
-          <div class="tool-note" style="margin-top:10px"><b>Formula used:</b> Adult 4 mL × kg × %TBSA; pediatric 3 mL × kg × %TBSA. Half is allocated to the first 8 hours from the time of burn and half over the next 16 hours. This tool calculates volume only.</div>
-          <div class="tool-note" style="margin-top:10px"><b>PVFIRE fluid:</b> Volume is displayed for Normal Saline, the crystalloid carried by PVFIRE. Follow Medical Control / receiving burn center direction for ongoing resuscitation.</div>
-        </div>
-      </div>
-    </div>`;
+    <div class="tools-grid tool-menu">
+      <button class="tool-launch" onclick="openToolCard('lido')"><span class="tool-launch-icon">💉</span><span><b>Lidocaine Dose</b><small>Adult cardiac arrest dose calculator</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('dopamine')"><span class="tool-launch-icon">IV</span><span><b>Dopamine Gravity Drip</b><small>Calculate gravity tubing gtt/min</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn TBSA</b><small>Rule of Nines interactive body map</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('parkland')"><span class="tool-launch-icon">💧</span><span><b>Parkland Burn Volume</b><small>Burn fluid volume calculator</small></span><span class="tool-chevron">›</span></button>
+    </div>
+    <div id="toolDetail"></div>`;
+}
+function toolBack(){renderTools()}
+function openToolCard(which){
+ const host=document.querySelector('#toolDetail');
+ document.querySelector('.tool-menu').style.display='none';
+ const back='<button class="back tool-back" onclick="toolBack()">‹ Back to Tools</button>';
+ if(which==='lido')host.innerHTML=back+`
+   <div class="tool-card"><h3>Lidocaine — Adult Cardiac Arrest</h3>
+   <div class="tool-note"><b>VF/pulseless VT:</b> PVFIRE calculator uses <b>1.0 mg/kg IV/IO</b> for the initial dose, with <b>no maximum dose cap</b>. Enter weight in pounds or kilograms.</div>
+   <input id="lidoWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
+   <select id="lidoUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select>
+   <button class="tool-btn" onclick="calcLido()">Calculate Lidocaine Dose</button><div id="lidoResult" class="tool-result" style="display:none"></div>
+   <div class="tool-note" style="margin-top:10px">AHA-based cardiac arrest tool. The 2025 AHA adult cardiac arrest algorithm lists lidocaine 1–1.5 mg/kg IV/IO for the first dose; this calculator intentionally uses the department-selected 1.0 mg/kg value.</div></div>`;
+ if(which==='dopamine')host.innerHTML=back+`
+   <div class="tool-card"><h3>Dopamine Gravity-Drip Calculator</h3>
+   <div class="tool-note">Gravity tubing only — no pump output. Enter the ordered dose and the actual bag concentration, then choose a 10 or 60 gtt/mL set.</div>
+   <input id="dopWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
+   <select id="dopWeightUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select>
+   <input id="dopDose" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Ordered dose (mcg/kg/min)">
+   <input id="dopMg" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Dopamine in bag (mg)">
+   <input id="dopMl" class="tool-input" inputmode="decimal" type="number" min="0" step="1" placeholder="Total bag volume (mL)">
+   <select id="dopGtt" class="tool-input"><option value="10">10 gtt/mL tubing</option><option value="60">60 gtt/mL tubing</option></select>
+   <button class="tool-btn" onclick="calcDopamine()">Calculate gtt/min</button><div id="dopResult" class="tool-result" style="display:none"></div>
+   <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose × weight kg × drop factor) ÷ concentration (mcg/mL).</div></div>`;
+ if(which==='burn'){host.innerHTML=back+`
+   <div class="tool-card"><h3>Burn TBSA — Rule of Nines</h3>
+   <div class="tool-note">Tap burned regions on the generic front/back anatomy map. Choose the age group first; pediatric proportions are adjusted.</div>
+   <div class="burn-age"><button id="burnAdult" class="on" onclick="setBurnAge('adult')">Adult</button><button id="burnChild" onclick="setBurnAge('child')">Child</button><button id="burnInfant" onclick="setBurnAge('infant')">Infant</button></div>
+   <div id="burnMap" class="burn-map"></div><div class="tbsa-sticky"><span>Estimated TBSA</span><b id="burnTotal">0%</b></div>
+   <button class="tool-btn" style="background:#475569" onclick="resetBurn()">Clear Burn Map</button>
+   <div class="tool-result"><div class="tool-note">Tap a body surface again to remove it.</div><div class="burn-mini">For small/scattered areas, the patient's palm including fingers is approximately 1% TBSA. Use the official protocol/source when exact burn classification or destination criteria are needed.</div></div></div>`;renderBurnMap();}
+ if(which==='parkland')host.innerHTML=back+`
+   <div class="tool-card"><h3>Parkland Burn Volume</h3>
+   <div class="tool-note">Enter the estimated TBSA and patient weight to estimate total crystalloid volume for the first 24 hours.</div>
+   <input id="burnTBSAInput" class="tool-input" inputmode="decimal" type="number" min="0" max="100" step="0.1" placeholder="Estimated TBSA %">
+   <input id="burnWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
+   <select id="burnWeightUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select>
+   <button class="tool-btn" onclick="burnTBSA=parseFloat(document.querySelector('#burnTBSAInput').value)||0;calcParkland()">Calculate Burn Fluid Volume</button>
+   <div id="parklandResult" class="tool-result" style="display:none"></div>
+   <div class="tool-note" style="margin-top:10px"><b>Formula used:</b> Adult 4 mL × kg × %TBSA; pediatric 3 mL × kg × %TBSA. Half is allocated to the first 8 hours from the time of burn and half over the next 16 hours. This tool calculates volume only.</div>
+   <div class="tool-note" style="margin-top:10px"><b>PVFIRE fluid:</b> Volume is displayed for Normal Saline, the crystalloid carried by PVFIRE. Follow Medical Control / receiving burn center direction for ongoing resuscitation.</div></div>`;
 }
 function calcLido(){
   const input=document.querySelector('#lidoWeight'),unit=document.querySelector('#lidoUnit'),box=document.querySelector('#lidoResult');
