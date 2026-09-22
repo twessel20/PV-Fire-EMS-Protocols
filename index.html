@@ -357,17 +357,32 @@ function formatMedication(x){
 }
 
 const protocolDoseCalcs={
+'combined-allergic-reaction':[{key:'epi',label:'Epinephrine 1:1000',formula:'0.01 mg/kg IM (max 0.3 mg)',unit:'mg',perKg:.01,max:.3},{key:'ben',label:'Diphenhydramine',formula:'1 mg/kg IV/IO/IM (max 50 mg)',unit:'mg',perKg:1,max:50},{key:'fluid',label:'NS/LR Bolus',formula:'20 mL/kg IV/IO (max 1000 mL)',unit:'mL',perKg:20,max:1000}],
+'combined-altered-mental-status':[{key:'nal',label:'Naloxone — Pediatric IV',formula:'0.1 mg/kg IV (max 2 mg)',unit:'mg',perKg:.1,max:2}],
+'combined-behavioral-psychiatric-disorder':[{key:'midA',label:'Midazolam — Adult',formula:'0.1 mg/kg IM/IN (max 10 mg)',unit:'mg',perKg:.1,max:10},{key:'midP',label:'Midazolam — Pediatric',formula:'0.1 mg/kg IM/IN (max 5 mg)',unit:'mg',perKg:.1,max:5}],
+'combined-dystonic-reaction':[{key:'ben',label:'Diphenhydramine',formula:'1 mg/kg IV/IM (max 50 mg)',unit:'mg',perKg:1,max:50}],
 'combined-hypoglycemia':[{key:'d10',label:'D10 — Pediatric',formula:'5 mL/kg IV/IO (max 125 mL)',unit:'mL',perKg:5,max:125}],
-'combined-allergic-reaction':[{key:'epi',label:'Epinephrine 1:1000 — Adult/Peds',formula:'0.01 mg/kg IM (max 0.3 mg)',unit:'mg',perKg:.01,max:.3},{key:'ben',label:'Diphenhydramine — Adult/Peds',formula:'1 mg/kg (max 50 mg)',unit:'mg',perKg:1,max:50}],
-'combined-dystonic-reaction':[{key:'ben',label:'Diphenhydramine — Adult/Peds',formula:'1 mg/kg (max 50 mg)',unit:'mg',perKg:1,max:50}],
-'combined-pain-control':[{key:'fen',label:'Fentanyl — Pediatric',formula:'1 mcg/kg slow IV/IN',unit:'mcg',perKg:1},{key:'ket',label:'Ketorolac — Pediatric >10 yr',formula:'0.5 mg/kg; max 15 mg IV / 30 mg IM/IN',unit:'mg',perKg:.5,special:'ket'}],
-'combined-seizure':[{key:'midin',label:'Midazolam — No IV established',formula:'0.2 mg/kg IN (max 5 mg)',unit:'mg',perKg:.2,max:5},{key:'midiv',label:'Midazolam — Pediatric IV',formula:'0.1 mg/kg slow IV (max 5 mg)',unit:'mg',perKg:.1,max:5}],
-'pediatric-wheezing':[{key:'epi',label:'Epinephrine 1:1000 — Pediatric',formula:'0.01 mg/kg IM (max 0.3 mg)',unit:'mg',perKg:.01,max:.3}],
-'pediatric-bradycardia':[{key:'epi',label:'Epinephrine 1:1000 — Child <8 yr',formula:'0.02 mg/kg IV/IO; min 0.1 mg, max 1 mg',unit:'mg',perKg:.02,min:.1,max:1},{key:'atr',label:'Atropine — Pediatric',formula:'0.02 mg/kg IV/IO; min 0.1 mg, max 1 mg',unit:'mg',perKg:.02,min:.1,max:1}],
-'pediatric-tachycardia-narrow-complex':[{key:'ad1',label:'Adenosine — First dose',formula:'0.1 mg/kg IV/IO (max 6 mg)',unit:'mg',perKg:.1,max:6},{key:'ad2',label:'Adenosine — Second dose',formula:'0.2 mg/kg IV/IO (max 12 mg)',unit:'mg',perKg:.2,max:12}],
-'pediatric-cardiac-arrest-vf-pulseless-vt':[{key:'am1',label:'Amiodarone — First dose',formula:'5 mg/kg IV/IO (max 300 mg)',unit:'mg',perKg:5,max:300},{key:'am2',label:'Amiodarone — Repeat dose',formula:'2.5 mg/kg IV/IO (max 150 mg)',unit:'mg',perKg:2.5,max:150}],
-'pediatric-cardiac-arrest-asystole-pea':[{key:'epi',label:'Epinephrine 1:10,000 — Pediatric',formula:'0.01 mg/kg IV/IO',unit:'mg',perKg:.01}],
-'combined-overdose-poisoning':[{key:'ca',label:'Calcium Chloride — Adult/Peds',formula:'0.2 mL/kg IV (max 10 mL)',unit:'mL',perKg:.2,max:10},{key:'bic',label:'Sodium Bicarbonate — Adult/Peds',formula:'1 mEq/kg (max 50 mEq)',unit:'mEq',perKg:1,max:50},{key:'nal',label:'Naloxone — Pediatric IV',formula:'0.1 mg/kg IV (max 2 mg)',unit:'mg',perKg:.1,max:2}]
+'combined-hypotension-shock':[{key:'fluid20',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000},{key:'fluid10',label:'NS/LR',formula:'10 mL/kg (max 500 mL)',unit:'mL',perKg:10,max:500}],
+'combined-overdose-poisoning':[{key:'nal',label:'Naloxone — Pediatric IV',formula:'0.1 mg/kg IV (max 2 mg)',unit:'mg',perKg:.1,max:2},{key:'bic',label:'Sodium Bicarbonate',formula:'1 mEq/kg IV (max 50 mEq)',unit:'mEq',perKg:1,max:50},{key:'ca',label:'Calcium Chloride',formula:'0.2 mL/kg IV (max 10 mL)',unit:'mL',perKg:.2,max:10}],
+'combined-pain-control':[{key:'ket',label:'Ketorolac — Pediatric',formula:'0.5–1 mg/kg; max 15 mg IV / 30 mg IM',unit:'mg',perKg:.5,special:'ketRange'},{key:'fen',label:'Fentanyl — Pediatric',formula:'1 mcg/kg slow IV/IN (max 50 mcg)',unit:'mcg',perKg:1,max:50}],
+'combined-post-resuscitation':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg; may repeat ×1',unit:'mL',perKg:20},{key:'nal',label:'Pediatric 0.1 mg/kg dose',formula:'0.1 mg/kg (max 2 mg)',unit:'mg',perKg:.1,max:2}],
+'combined-seizure':[{key:'midin',label:'Midazolam — IN',formula:'0.2 mg/kg IN (max 5 mg)',unit:'mg',perKg:.2,max:5},{key:'midiv',label:'Midazolam — Pediatric IV',formula:'0.1 mg/kg slow IV (max 5 mg)',unit:'mg',perKg:.1,max:5}],
+'adult-bradycardia':[{key:'fluid',label:'NS/LR',formula:'10 mL/kg (max 500 mL)',unit:'mL',perKg:10,max:500}],
+'adult-cardiac-arrest-vf-pulseless-vt':[{key:'bic',label:'Sodium Bicarbonate',formula:'1 mEq/kg IV/IO',unit:'mEq',perKg:1}],
+'adult-cardiac-arrest-asystole-pea':[{key:'bic',label:'Sodium Bicarbonate',formula:'1 mEq/kg IV/IO',unit:'mEq',perKg:1}],
+'neonatal-resuscitation':[{key:'epi',label:'Epinephrine 1:10,000',formula:'0.01 mg/kg IV/IO every 3–5 min',unit:'mg',perKg:.01}],
+'pediatric-wheezing':[{key:'solu',label:'Methylprednisolone',formula:'2 mg/kg IV over 2 min',unit:'mg',perKg:2},{key:'epi',label:'Epinephrine 1:1000',formula:'0.01 mg/kg IM (max 0.3 mg)',unit:'mg',perKg:.01,max:.3},{key:'fluid',label:'NS/LR Bolus',formula:'20 mL/kg',unit:'mL',perKg:20}],
+'pediatric-bradycardia':[{key:'epi',label:'Epinephrine 1:10,000',formula:'0.1 mg/kg IV/IO',unit:'mg',perKg:.1},{key:'atr',label:'Atropine',formula:'0.02 mg/kg IV/IO (minimum 0.1 mg; max 1 mg)',unit:'mg',perKg:.02,min:.1,max:1},{key:'fluid',label:'NS/LR',formula:'10 mL/kg (max 500 mL)',unit:'mL',perKg:10,max:500}],
+'pediatric-tachycardia-narrow-complex':[{key:'ad1',label:'Adenosine — First dose',formula:'0.1 mg/kg IV (max 6 mg)',unit:'mg',perKg:.1,max:6},{key:'ad2',label:'Adenosine — Second dose',formula:'0.2 mg/kg IV (max 12 mg)',unit:'mg',perKg:.2,max:12}],
+'pediatric-tachycardia-wide-complex':[{key:'amio',label:'Amiodarone',formula:'5 mg/kg IV/IO (max 300 mg) over 20 min',unit:'mg',perKg:5,max:300}],
+'pediatric-cardiac-arrest-vf-pulseless-vt':[{key:'epi',label:'Epinephrine 1:10,000',formula:'0.01 mg/kg IV/IO',unit:'mg',perKg:.01},{key:'am1',label:'Amiodarone — First dose',formula:'5 mg/kg IV/IO (max 300 mg)',unit:'mg',perKg:5,max:300},{key:'am2',label:'Amiodarone — Repeat',formula:'2.5 mg/kg IV/IO (max 150 mg)',unit:'mg',perKg:2.5,max:150}],
+'pediatric-cardiac-arrest-asystole-pea':[{key:'epi',label:'Epinephrine 1:10,000',formula:'0.01 mg/kg IV/IO',unit:'mg',perKg:.01}],
+'combined-abdominal-trauma':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000}],
+'combined-burn':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 500 mL)',unit:'mL',perKg:20,max:500}],
+'combined-chest-trauma':[{key:'fluid',label:'Pediatric NS/LR',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000}],
+'combined-extremity-trauma':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000},{key:'bic',label:'Sodium Bicarbonate',formula:'1 mEq/kg IV/IO',unit:'mEq',perKg:1}],
+'combined-head-trauma':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000}],
+'combined-traumatic-cardiac-arrest':[{key:'fluid',label:'Pediatric Fluid Bolus',formula:'20 mL/kg (max 1000 mL)',unit:'mL',perKg:20,max:1000}]
 };
 function protocolDoseTools(x){
  const cs=protocolDoseCalcs[x.id];if(!cs)return '';
@@ -377,7 +392,7 @@ function calcProtocolDose(pid,key){
  const c=(protocolDoseCalcs[pid]||[]).find(v=>v.key===key),id='dc-'+pid+'-'+key,out=document.getElementById(id+'-o'),w=parseFloat(document.getElementById(id+'-w').value),u=document.getElementById(id+'-u').value;
  if(!c||!Number.isFinite(w)||w<=0){out.innerHTML='<b>Enter a valid patient weight.</b>';return}
  const kg=u==='lb'?w/2.2046226218:w,raw=kg*c.perKg;let dose=raw;if(Number.isFinite(c.max))dose=Math.min(dose,c.max);if(Number.isFinite(c.min))dose=Math.max(dose,c.min);
- if(c.special==='ket'){out.innerHTML=kg.toFixed(1)+' kg<br><strong>'+Math.min(raw,15).toFixed(1)+' mg IV</strong><br><strong>'+Math.min(raw,30).toFixed(1)+' mg IM/IN</strong>';return}
+ if(c.special==='ket'||c.special==='ketRange'){const low=kg*.5,high=kg*1;out.innerHTML=kg.toFixed(1)+' kg<br><strong>'+Math.min(low,15).toFixed(1)+'–'+Math.min(high,15).toFixed(1)+' mg IV</strong><br><strong>'+Math.min(low,30).toFixed(1)+'–'+Math.min(high,30).toFixed(1)+' mg IM</strong>';return}
  let note='';if(Number.isFinite(c.max)&&raw>c.max)note='Maximum dose applied.';if(Number.isFinite(c.min)&&raw<c.min)note='Minimum dose applied.';
  out.innerHTML=kg.toFixed(1)+' kg × '+c.perKg+' '+c.unit+'/kg<br><strong>'+dose.toFixed(dose<10?2:1)+' '+c.unit+'</strong><div class="dose-note">'+note+'</div>';
 }
