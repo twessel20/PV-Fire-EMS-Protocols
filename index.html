@@ -76,6 +76,11 @@ body{background:#f4f7fa}
 /* v72 patient home-medication lookup */
 .patient-med-shell{display:grid;gap:12px}.patient-med-search{background:#fff;border:1px solid #d8e3ec;border-radius:14px;padding:14px;box-shadow:0 1px 3px #0000000d}.patient-med-search h2{margin:0 0 6px;color:#173a5e;font-size:20px}.patient-med-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}.patient-med-row .tool-input{margin:0}.patient-med-row .tool-btn{width:auto;margin:0;padding-left:18px;padding-right:18px}.patient-med-result{display:grid;gap:10px}.patient-med-card{background:#fff;border:1px solid #d8e3ec;border-radius:12px;padding:12px}.patient-med-card h3{margin:0 0 6px;color:#173a5e;font-size:17px}.patient-med-label{font-size:11px;font-weight:900;color:#2f6690;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 5px}.patient-med-copy{font-size:14px;line-height:1.45;color:#334155;white-space:pre-wrap}.patient-med-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.patient-med-link{display:inline-block;text-decoration:none;background:#eef4f8;border:1px solid #cad8e3;color:#173a5e;border-radius:9px;padding:8px 10px;font-size:13px;font-weight:800}.patient-med-candidates{display:grid;gap:7px;margin-top:10px}.patient-med-choice{width:100%;text-align:left;background:#fff;border:1px solid #cad8e3;border-radius:9px;padding:10px;color:#173a5e;font-weight:750}.patient-med-warning{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px;font-size:12px;line-height:1.4;color:#7c2d12}@media(max-width:600px){.patient-med-row{grid-template-columns:1fr}.patient-med-row .tool-btn{width:100%}}
 
+
+.pc-date-grid{display:grid;grid-template-columns:72px 72px 96px 1fr;gap:7px}
+.pc-date-grid input{margin-top:0;text-align:center}
+.pc-date-grid .pc-time{text-align:left}
+@media(max-width:600px){.pc-date-grid{grid-template-columns:64px 64px 86px 1fr;gap:6px}.pc-date-grid input{padding:10px 6px;font-size:15px}}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -203,22 +208,51 @@ function pillCountFormHtml(){
    <div class="calc-field"><label for="pcFreqType">Prescription frequency</label><select id="pcFreqType" class="tool-input" onchange="pillCountFrequencyUI()"><option value="perday">Times per day</option><option value="hours">Every X hours</option></select></div>
    <div id="pcPerDayWrap" class="calc-field"><label for="pcPerDay">Doses per day</label><input id="pcPerDay" class="tool-input" inputmode="decimal" type="number" min="0.25" step="0.25" value="1" placeholder="Example: 1, 2, 3"></div>
    <div id="pcHoursWrap" class="calc-field" style="display:none"><label for="pcHours">Dose every how many hours?</label><input id="pcHours" class="tool-input" inputmode="decimal" type="number" min="1" step="1" placeholder="Example: 6, 8, 12"></div>
-   <div class="calc-field"><label for="pcStart">Prescription start / first-dose date and time</label><input id="pcStart" class="tool-input" type="datetime-local"><small>Use the first-dose time when known. If only the fill date is known, the result is an estimate.</small></div>
-   <div class="calc-field"><label for="pcAsOf">Count date and time</label><input id="pcAsOf" class="tool-input" type="datetime-local"></div>
+
+   <div class="calc-field">
+    <label>Prescription start / first dose</label>
+    <div class="pc-date-grid">
+     <input id="pcStartM" class="tool-input" inputmode="numeric" maxlength="2" placeholder="MM">
+     <input id="pcStartD" class="tool-input" inputmode="numeric" maxlength="2" placeholder="DD">
+     <input id="pcStartY" class="tool-input" inputmode="numeric" maxlength="4" placeholder="YYYY">
+     <input id="pcStartT" class="tool-input pc-time" type="time">
+    </div>
+    <small>Enter as month / day / year. Use the first-dose time when known.</small>
+   </div>
+
+   <div class="calc-field">
+    <label>Count date / time</label>
+    <div class="pc-date-grid">
+     <input id="pcAsOfM" class="tool-input" inputmode="numeric" maxlength="2" placeholder="MM">
+     <input id="pcAsOfD" class="tool-input" inputmode="numeric" maxlength="2" placeholder="DD">
+     <input id="pcAsOfY" class="tool-input" inputmode="numeric" maxlength="4" placeholder="YYYY">
+     <input id="pcAsOfT" class="tool-input pc-time" type="time">
+    </div>
+   </div>
+
    <button class="tool-btn" onclick="calcPillCount()">Calculate expected count</button>
    <div id="pcResult" class="tool-result" style="display:none"></div>
    <div class="patient-med-warning" style="margin-top:10px"><b>Important:</b> This is an estimate, not proof of ingestion. PRN directions, refill timing, missed doses, pill organizers, lost pills, early/late doses, and pills stored elsewhere can change the expected count.</div>`;
 }
 function initPillCountDates(){
- const now=new Date(),pad=n=>String(n).padStart(2,'0'),fmt=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
- const asof=document.getElementById('pcAsOf');if(asof&&!asof.value)asof.value=fmt(now);
+ const now=new Date(),pad=n=>String(n).padStart(2,'0');
+ const vals={M:pad(now.getMonth()+1),D:pad(now.getDate()),Y:String(now.getFullYear()),T:pad(now.getHours())+':'+pad(now.getMinutes())};
+ for(const k of ['M','D','Y','T']){const el=document.getElementById('pcAsOf'+k);if(el&&!el.value)el.value=vals[k]}
 }
 function pillCountFrequencyUI(){
  const mode=document.getElementById('pcFreqType')?.value;
  const a=document.getElementById('pcPerDayWrap'),b=document.getElementById('pcHoursWrap');
  if(a)a.style.display=mode==='perday'?'block':'none';
  if(b)b.style.display=mode==='hours'?'block':'none';
+}function pillCountReadDate(prefix){
+ const m=Number(document.getElementById(prefix+'M')?.value),d=Number(document.getElementById(prefix+'D')?.value),y=Number(document.getElementById(prefix+'Y')?.value);
+ const t=(document.getElementById(prefix+'T')?.value||'00:00').split(':'),hh=Number(t[0]||0),mm=Number(t[1]||0);
+ if(!Number.isInteger(m)||m<1||m>12||!Number.isInteger(d)||d<1||d>31||!Number.isInteger(y)||y<2000||y>2100)return null;
+ const dt=new Date(y,m-1,d,hh,mm,0,0);
+ if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d)return null;
+ return dt;
 }
+
 function showPatientMedPillCount(){
  const host=document.getElementById('patientMedResult');
  host.innerHTML='<div class="tool-card"><h3>🔢 Pill Count</h3>'+pillCountFormHtml()+'</div>';
@@ -480,14 +514,13 @@ function calcPillCount(){
  const mode=document.getElementById('pcFreqType')?.value||'perday';
  const perDay=Number(document.getElementById('pcPerDay')?.value);
  const everyHours=Number(document.getElementById('pcHours')?.value);
- const startRaw=document.getElementById('pcStart')?.value;
- const asOfRaw=document.getElementById('pcAsOf')?.value;
+ const start=pillCountReadDate('pcStart');
+ const asOf=pillCountReadDate('pcAsOf');
  if(!Number.isFinite(qty)||qty<0||!Number.isFinite(remain)||remain<0||!Number.isFinite(perDose)||perDose<=0){
   out.style.display='block';out.innerHTML='<b>Enter valid quantity, remaining count, and pills per dose.</b>';return;
  }
- if(!startRaw||!asOfRaw){out.style.display='block';out.innerHTML='<b>Enter the prescription start/first-dose time and the count time.</b>';return}
- const start=new Date(startRaw),asOf=new Date(asOfRaw);
- if(!Number.isFinite(start.getTime())||!Number.isFinite(asOf.getTime())||asOf<start){out.style.display='block';out.innerHTML='<b>Check the start and count dates/times.</b>';return}
+ if(!start||!asOf){out.style.display='block';out.innerHTML='<b>Enter valid dates as MM / DD / YYYY and select the times.</b>';return}
+ if(asOf<start){out.style.display='block';out.innerHTML='<b>The count date/time must be after the prescription start/first-dose time.</b>';return}
  let intervalHours;
  if(mode==='hours'){
    if(!Number.isFinite(everyHours)||everyHours<=0){out.style.display='block';out.innerHTML='<b>Enter a valid hourly interval.</b>';return}
