@@ -38,6 +38,25 @@ body{background:var(--pvfd-bg);color:var(--pvfd-ink)}
 .source,.dose-btn{background:var(--pvfd-red);border-bottom:0}.back{background:#e9ecef;color:#1f2937;border:1px solid #d8dde3;border-bottom:0}
 .guide-steps{border-top:1px solid var(--pvfd-line)}.guide-steps h3:before{content:''}.home-alert:before{content:''}
 .notice,.related-box{border-color:var(--pvfd-line);border-left:3px solid var(--pvfd-gold);border-top:1px solid var(--pvfd-line)}
+
+/* PVFD blue field-reference palette — presentation only */
+:root{--pv-blue-950:#102a43;--pv-blue-900:#163a5f;--pv-blue-800:#1f4e79;--pv-blue-700:#28689a;--pv-blue-100:#eaf2f8;--pv-blue-50:#f5f9fc;--pv-ink:#1f2937;--pv-muted:#64748b;--pv-line:#d8e3ec}
+body{background:var(--pv-blue-50);color:var(--pv-ink)}
+.top{background:linear-gradient(180deg,var(--pv-blue-950),var(--pv-blue-900));border-bottom:3px solid var(--pv-blue-700);box-shadow:none}
+.sub{color:#dceaf5}.status{background:#ffffff12;border-color:#ffffff25}
+.rolebtn,.homebtn,.clearsearch{background:#ffffff0d;border-color:#ffffff32}.rolebtn.on{background:#fff;color:var(--pv-blue-900);border-color:#fff}
+.tabs{background:#fff;border-bottom:1px solid var(--pv-line)}.tab{background:var(--pv-blue-100);color:var(--pv-blue-950);border-color:#d4e2ed}.tab.on{background:var(--pv-blue-800);color:#fff;border-color:var(--pv-blue-800)}
+.card{border-color:var(--pv-line);border-left-color:#aac4d8;background:#fff}.card:active{border-left-color:var(--pv-blue-700)}
+.protocol-icon{color:var(--pv-blue-800);background:var(--pv-blue-50);border-color:var(--pv-line)}
+.home-hero{background:#fff;border-color:var(--pv-line);border-top-color:var(--pv-blue-800)}.home-hero h2{color:var(--pv-blue-900)}
+.quick-card{border-color:var(--pv-line);border-top-color:#aac4d8;background:#fff}
+.section{background:var(--pv-blue-50);color:var(--pv-blue-900);border-color:var(--pv-line);border-left-color:var(--pv-blue-700)}
+.source,.dose-btn{background:var(--pv-blue-800)}.dose-tools{border-color:#cbddea;background:#f7fbfe}.dose-tools h4,.dose-out strong{color:var(--pv-blue-900)}
+.back{background:var(--pv-blue-100);color:var(--pv-blue-950);border-color:var(--pv-line)}
+.tab.on,.source,.dose-btn{box-shadow:none}
+.notice,.related-box{border-color:var(--pv-line);border-left:3px solid var(--pv-blue-700);border-top:1px solid var(--pv-line)}
+.related-link{color:var(--pv-blue-800)}.med-label,.bullet:before{color:var(--pv-blue-800)}
+.protocol-mode.bls{background:#edf6fc;color:#174b70;border-color:#b8d5e8}.protocol-mode.als{background:#e8f0f7;color:#173f61;border-color:#abc7dc}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="pvfd-logo.jpg" alt="Pleasant Valley Fire Department patch"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
