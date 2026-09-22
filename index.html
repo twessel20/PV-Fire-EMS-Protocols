@@ -77,7 +77,7 @@ body{background:#f4f7fa}
 .patient-med-shell{display:grid;gap:12px}.patient-med-search{background:#fff;border:1px solid #d8e3ec;border-radius:14px;padding:14px;box-shadow:0 1px 3px #0000000d}.patient-med-search h2{margin:0 0 6px;color:#173a5e;font-size:20px}.patient-med-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}.patient-med-row .tool-input{margin:0}.patient-med-row .tool-btn{width:auto;margin:0;padding-left:18px;padding-right:18px}.patient-med-result{display:grid;gap:10px}.patient-med-card{background:#fff;border:1px solid #d8e3ec;border-radius:12px;padding:12px}.patient-med-card h3{margin:0 0 6px;color:#173a5e;font-size:17px}.patient-med-label{font-size:11px;font-weight:900;color:#2f6690;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 5px}.patient-med-copy{font-size:14px;line-height:1.45;color:#334155;white-space:pre-wrap}.patient-med-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.patient-med-link{display:inline-block;text-decoration:none;background:#eef4f8;border:1px solid #cad8e3;color:#173a5e;border-radius:9px;padding:8px 10px;font-size:13px;font-weight:800}.patient-med-candidates{display:grid;gap:7px;margin-top:10px}.patient-med-choice{width:100%;text-align:left;background:#fff;border:1px solid #cad8e3;border-radius:9px;padding:10px;color:#173a5e;font-weight:750}.patient-med-warning{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px;font-size:12px;line-height:1.4;color:#7c2d12}@media(max-width:600px){.patient-med-row{grid-template-columns:1fr}.patient-med-row .tool-btn{width:100%}}
 
 
-.pc-date-button{width:100%;min-height:56px;border:2px solid #2f6690;background:#eef4f8;color:#173a5e;border-radius:12px;padding:14px 16px;font-size:18px;font-weight:900;text-align:left;margin-top:6px;touch-action:manipulation}.pc-native-date{min-height:54px;font-size:18px;margin-top:8px}.pc-native-date::-webkit-calendar-picker-indicator{transform:scale(1.5);padding:8px;cursor:pointer}@media(max-width:600px){.pc-date-button{min-height:62px;font-size:18px}.pc-native-date{min-height:58px;font-size:18px}}
+.pc-scroll-date{display:grid;grid-template-columns:1.25fr .9fr 1.15fr;gap:8px;margin-top:6px}.pc-scroll-select{min-height:58px;font-size:18px;font-weight:800;padding:12px 10px;background:#fff;touch-action:manipulation}@media(max-width:600px){.pc-scroll-date{gap:6px}.pc-scroll-select{min-height:62px;font-size:18px;padding:12px 6px}}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -207,15 +207,22 @@ function pillCountFormHtml(){
    <div id="pcHoursWrap" class="calc-field" style="display:none"><label for="pcHours">Dose every how many hours?</label><input id="pcHours" class="tool-input" inputmode="decimal" type="number" min="1" step="1" placeholder="Example: 6, 8, 12"></div>
 
    <div class="calc-field">
-    <label for="pcStartDate">Prescription start date</label>
-    <button type="button" class="pc-date-button" onclick="document.getElementById('pcStartDate').showPicker?.() || document.getElementById('pcStartDate').click()">📅 Choose start date</button>
-    <input id="pcStartDate" class="tool-input pc-native-date" type="date">
+    <label>Prescription start date</label>
+    <div class="pc-scroll-date">
+     <select id="pcStartM" class="tool-input pc-scroll-select" aria-label="Start month"></select>
+     <select id="pcStartD" class="tool-input pc-scroll-select" aria-label="Start day"></select>
+     <select id="pcStartY" class="tool-input pc-scroll-select" aria-label="Start year"></select>
+    </div>
+    <small>Tap Month, Day, or Year and scroll to the date.</small>
    </div>
 
    <div class="calc-field">
-    <label for="pcAsOfDate">Count date</label>
-    <button type="button" class="pc-date-button" onclick="document.getElementById('pcAsOfDate').showPicker?.() || document.getElementById('pcAsOfDate').click()">📅 Choose count date</button>
-    <input id="pcAsOfDate" class="tool-input pc-native-date" type="date">
+    <label>Count date</label>
+    <div class="pc-scroll-date">
+     <select id="pcAsOfM" class="tool-input pc-scroll-select" aria-label="Count month"></select>
+     <select id="pcAsOfD" class="tool-input pc-scroll-select" aria-label="Count day"></select>
+     <select id="pcAsOfY" class="tool-input pc-scroll-select" aria-label="Count year"></select>
+    </div>
    </div>
 
    <button class="tool-btn" onclick="calcPillCount()">Calculate expected count</button>
@@ -223,8 +230,21 @@ function pillCountFormHtml(){
    <div class="patient-med-warning" style="margin-top:10px"><b>Important:</b> This is an estimate, not proof of ingestion. PRN directions, refill timing, missed doses, pill organizers, lost pills, early/late doses, and pills stored elsewhere can change the expected count.</div>`;
 }
 function initPillCountDates(){
- const now=new Date(),pad=n=>String(n).padStart(2,'0'),val=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
- const asof=document.getElementById('pcAsOfDate');if(asof&&!asof.value)asof.value=val;
+ const now=new Date(),year=now.getFullYear();
+ const months=['Month','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ const monthOpts=months.map((m,i)=>'<option value="'+(i||'')+'">'+m+'</option>').join('');
+ const dayOpts='<option value="">Day</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('');
+ const yearOpts='<option value="">Year</option>'+Array.from({length:16},(_,i)=>year+1-i).map(y=>'<option value="'+y+'">'+y+'</option>').join('');
+ for(const p of ['pcStart','pcAsOf']){
+   const m=document.getElementById(p+'M'),d=document.getElementById(p+'D'),y=document.getElementById(p+'Y');
+   if(m&&!m.options.length)m.innerHTML=monthOpts;
+   if(d&&!d.options.length)d.innerHTML=dayOpts;
+   if(y&&!y.options.length)y.innerHTML=yearOpts;
+ }
+ const am=document.getElementById('pcAsOfM'),ad=document.getElementById('pcAsOfD'),ay=document.getElementById('pcAsOfY');
+ if(am)am.value=String(now.getMonth()+1);
+ if(ad)ad.value=String(now.getDate());
+ if(ay)ay.value=String(year);
 }
 function pillCountFrequencyUI(){
  const mode=document.getElementById('pcFreqType')?.value;
@@ -232,12 +252,9 @@ function pillCountFrequencyUI(){
  if(a)a.style.display=mode==='perday'?'block':'none';
  if(b)b.style.display=mode==='hours'?'block':'none';
 }function pillCountReadDate(prefix){
- const id=prefix==='pcStart'?'pcStartDate':'pcAsOfDate';
- const raw=document.getElementById(id)?.value;
- if(!raw)return null;
- const parts=raw.split('-').map(Number);
- if(parts.length!==3)return null;
- const [y,m,d]=parts,dt=new Date(y,m-1,d,12,0,0,0);
+ const m=Number(document.getElementById(prefix+'M')?.value),d=Number(document.getElementById(prefix+'D')?.value),y=Number(document.getElementById(prefix+'Y')?.value);
+ if(!Number.isInteger(m)||m<1||m>12||!Number.isInteger(d)||d<1||d>31||!Number.isInteger(y)||y<2000||y>2100)return null;
+ const dt=new Date(y,m-1,d,12,0,0,0);
  if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d)return null;
  return dt;
 }
