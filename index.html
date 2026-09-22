@@ -647,32 +647,7 @@ function formatDnrProtocol(x){
  }
  return html;
 }
-<style>
-.tcd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0}
-.tcd-card{background:#fff;border:1px solid #cbdbe8;border-radius:12px;padding:13px 14px;box-shadow:0 1px 2px #0000000d}
-.tcd-card h3{margin:0 0 8px;color:#173a5e;font-size:16px}
-.tcd-card div{padding:5px 0;border-top:1px solid #edf2f6;color:#26394b;font-weight:650;line-height:1.25}
-.tcd-card h3+div{border-top:0}
-@media(max-width:600px){.tcd-grid{grid-template-columns:1fr}.tcd-card{padding:12px}}
-</style>
-function formatTcdDestinations(x){
- const viewer=sourceHref(x);
- return '<div class="reference-source">'+
-   '<div class="section">TCD DESTINATIONS — QUICK REFERENCE</div>'+
-   '<div class="notice">Quick display transcribed from the official PVFIRE TCD Destinations appendix, page 160. Use the official page below to verify the source layout.</div>'+
-   '<div class="tcd-grid">'+
-    '<div class="tcd-card"><h3>🚑 Trauma Centers</h3><div>Liberty Hospital</div><div>Centerpoint</div><div>Belton Regional Medical Center</div><div>KU Medical Center</div><div>Children\'s Mercy Hospital</div><div>North Kansas City Hospital</div><div>Research Medical Center</div><div>Truman Medical Center Hospital Hill</div><div>Lee\'s Summit Medical Center</div></div>'+
-    '<div class="tcd-card"><h3>❤️ STEMI Centers</h3><div>Liberty Hospital</div><div>Centerpoint</div><div>KU Medical Center</div><div>North Kansas City Hospital</div><div>Research Medical Center</div><div>Lee\'s Summit Medical Center</div><div>St Lukes Plaza</div></div>'+
-    '<div class="tcd-card"><h3>🧠 Stroke — Primary</h3><div>Liberty Hospital</div><div>St Joseph Medical Center</div><div>St Lukes Plaza</div><div>Menorah Medical Center</div><div>St Lukes East</div><div>North Kansas City Hospital</div><div>St Lukes North</div><div>Olathe Medical Center</div><div>St Mary\'s Blue Springs</div><div>Overland Park Regional Medical Center</div><div>Centerpoint Medical Center</div><div>Providence Medical Center</div><div>Shawnee Mission Medical Center</div><div>St Lukes South</div></div>'+
-    '<div class="tcd-card"><h3>🧠 Stroke — Comprehensive</h3><div>KU Medical Center</div><div>Research Medical Center</div><div>St Lukes Plaza</div><div>Truman Medical Center Hospital Hill</div></div>'+
-    '<div class="tcd-card"><h3>🔥 Burn Centers</h3><div>KU Medical Center</div><div>Research Medical Center</div><div>Children\'s Mercy Hospital</div></div>'+
-    '<div class="tcd-card"><h3>🫀 LVAD Destinations</h3><div>North Kansas City</div><div>Liberty Hospital</div></div>'+
-   '</div>'+
-   '<div class="appendix-actions"><a class="source" href="'+esc(viewer)+'">Open Official TCD Page 160 ↗</a></div>'+
- '</div>';
-}
 function formatAppendix(x){
- if(x.id==='tcd-destinations')return formatTcdDestinations(x);
  const src=x.sourceFile||x.pageUrl||'updates/published/current-protocol-book.pdf';
  const pdf=src.split('#')[0],start=Number(x.page||((src.match(/#page=(\d+)/i)||[])[1])||1),end=Number(x.endPage||start);
  const range=end>start?'Pages '+start+'–'+end:'Page '+start;
@@ -747,7 +722,6 @@ function protocolToolLinks(x){
  if(['childbirth','neonatal-resuscitation'].includes(x.id))tools.push(['👶','APGAR Score','apgar']);
  if(['combined-general-medical','combined-general-trauma','patient-destination-criteria','combined-head-injury'].includes(x.id))tools.push(['🧠','Glasgow Coma Scale','gcs']);
  if(['combined-general-medical','combined-general-trauma'].includes(x.id))tools.push(['🚑','START Triage','start']);
- if(role!=='EMT'&&['combined-hypotension-shock','combined-post-resuscitation','adult-bradycardia','epinephrine-1-100000-push-dose-procedure','epinephrine-1-100-000'].includes(x.id))tools.push(['💉','Push-Dose Epinephrine Calculator','pushdose']);
  if(!tools.length)return '';
  return '<div class="protocol-tools"><div class="related-title">Field Tools — Use Here</div>'+tools.map(t=>'<button class="protocol-tool-btn" onclick="toggleInlineProtocolTool(\''+t[2]+'\',this)"><span>'+t[0]+'</span><b>'+t[1]+'</b><span class="tool-chevron">›</span></button><div class="inline-tool-slot" data-tool="'+t[2]+'"></div>').join('')+'</div>';
 }
@@ -755,16 +729,7 @@ function toolContent(which){
  if(which==='apgar')return `<div class="tool-card inline-field-tool"><h3>APGAR Score</h3><div class="tool-note">Score each category 0, 1, or 2. PVFIRE Childbirth protocol documents APGAR at 1 and 5 minutes.</div><div class="score-grid">${scoreSelect('apAppearance','Appearance / color',[['0','Blue or pale all over'],['1','Body pink, extremities blue'],['2','Completely pink']])}${scoreSelect('apPulse','Pulse / heart rate',[['0','Absent'],['1','Below 100/min'],['2','100/min or greater']])}${scoreSelect('apGrimace','Grimace / reflex irritability',[['0','No response'],['1','Grimace'],['2','Cough, sneeze, cry, or active withdrawal']])}${scoreSelect('apActivity','Activity / muscle tone',[['0','Limp'],['1','Some flexion'],['2','Active motion']])}${scoreSelect('apResp','Respiration',[['0','Absent'],['1','Slow or irregular'],['2','Good respirations / strong cry']])}</div><div id="apgarResult" class="tool-result score-total"><b>APGAR: — / 10</b></div></div>`;
  if(which==='gcs')return `<div class="tool-card inline-field-tool"><h3>Glasgow Coma Scale</h3><div class="tool-note">Select the best observed response in each category.</div><div class="score-grid">${scoreSelect('gcsEye','Eye opening',[['1','None'],['2','To pressure'],['3','To sound'],['4','Spontaneous']])}${scoreSelect('gcsVerbal','Verbal response',[['1','None'],['2','Incomprehensible sounds'],['3','Inappropriate words'],['4','Confused'],['5','Oriented']])}${scoreSelect('gcsMotor','Motor response',[['1','None'],['2','Extension'],['3','Abnormal flexion'],['4','Normal flexion / withdrawal'],['5','Localizes'],['6','Obeys commands']])}</div><div id="gcsResult" class="tool-result score-total"><b>GCS: — / 15</b></div></div>`;
  if(which==='start')return `<div class="tool-card inline-field-tool"><h3>START Triage</h3><div class="tool-note"><b>Adult START decision aid.</b> Follow the prompts in order. This is an added field aid; the current PVFIRE protocol dataset directs crews to begin triage as needed but does not contain a department START algorithm.</div><div id="startBox" class="triage-box"></div><button class="tool-btn" style="background:#475569" onclick="resetStart()">Restart START Triage</button></div>`;
- if(which==='pushdose')return `<div class="tool-card inline-field-tool"><h3>Push-Dose Epinephrine</h3><div class="tool-note"><b>PVFIRE protocol:</b> Adult only, 10–20 mcg IV/IO every 2–3 minutes if SBP &lt; 90 mmHg.</div><div class="calc-field"><label for="pushDoseMcg">Dose</label><div class="calc-unit-input"><input id="pushDoseMcg" class="tool-input" inputmode="decimal" type="number" min="10" max="20" step="1" value="10"><span>mcg</span></div><small>Protocol range: 10–20 mcg.</small></div><button class="tool-btn" onclick="calcPushDose()">Calculate volume</button><div id="pushDoseResult" class="tool-result" style="display:none"></div><div class="tool-note" style="margin-top:10px"><b>Preparation:</b> Eject 1 mL from a 10 mL saline flush, then add 1 mL of epinephrine 1:10,000. Final concentration: 100 mcg in 10 mL = 10 mcg/mL.</div></div>`;
  return '';
-}
-function calcPushDose(){
- const input=document.getElementById('pushDoseMcg'),out=document.getElementById('pushDoseResult'),dose=parseFloat(input&&input.value);
- if(!out)return;
- out.style.display='block';
- if(!Number.isFinite(dose)||dose<10||dose>20){out.innerHTML='<b>Enter a dose from 10–20 mcg.</b>';return}
- const volume=dose/10;
- out.innerHTML='<div><b>'+dose.toFixed(dose%1?1:0)+' mcg</b> at 10 mcg/mL</div><div style="margin-top:6px"><strong>'+volume.toFixed(volume%1?1:0)+' mL IV/IO</strong></div><div class="dose-note">PVFIRE: may repeat every 2–3 minutes if SBP remains &lt; 90 mmHg.</div>';
 }
 function toggleInlineProtocolTool(which,btn){
  const slot=btn.nextElementSibling,opening=!slot.innerHTML;
