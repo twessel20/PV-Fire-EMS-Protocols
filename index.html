@@ -57,6 +57,9 @@ body{background:#f4f7fa}
 
 /* v56 protocol-linked field tools */
 .protocol-tools{margin:14px 0;background:#f8fafc;border:1px solid #dbe4ee;border-radius:12px;padding:12px}.protocol-tool-btn{width:100%;display:grid;grid-template-columns:28px 1fr 18px;align-items:center;gap:8px;text-align:left;background:#fff;border:1px solid #dbe4ee;border-radius:9px;padding:10px 11px;margin:6px 0;color:#173a5e}.protocol-tool-btn b{font-size:14px}.protocol-tool-btn .tool-chevron{font-size:22px;color:#64748b}
+
+/* v57 searchable field tools */
+.search-tool-group{margin-bottom:14px}.search-tool{margin-bottom:8px}.search-tool-group .related-title{margin:2px 0 8px}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -342,6 +345,21 @@ function calcParkland(){
     <div class="burn-mini" style="margin-top:8px">Weight: ${kg.toFixed(1)} kg • TBSA: ${burnTBSA}% • Timing begins at the time of injury, not EMS arrival.</div>`;
 }
 function resetBurn(){burnSelected.clear();renderBurnMap()}
+const searchableTools=[
+ {id:'apgar',title:'APGAR Score',icon:'👶',terms:'apgar newborn neonatal infant childbirth appearance pulse grimace activity respiration',desc:'Appearance, pulse, grimace, activity and respiration'},
+ {id:'gcs',title:'Glasgow Coma Scale',icon:'🧠',terms:'gcs glasgow coma scale neuro neurological eye verbal motor mental status',desc:'Eye, verbal and motor scoring'},
+ {id:'start',title:'START Triage',icon:'🚑',terms:'start triage mci mass casualty disaster green yellow red black rpm respirations perfusion mental status',desc:'Adult mass-casualty triage decision aid'},
+ {id:'burn',title:'Burn Calculator — TBSA + Parkland',icon:'🔥',terms:'burn burns tbsa total body surface area parkland fluid rule of nines',desc:'Burn map, TBSA and Parkland fluid calculation'},
+ {id:'dopamine',title:'Dopamine Gravity Drip',icon:'IV',terms:'dopamine drip gravity gtt micrograms mcg kg min infusion',desc:'Gravity-drip gtt/min calculator'},
+ {id:'lido',title:'Lidocaine Dose',icon:'💉',terms:'lidocaine dose cardiac arrest vf pulseless vt mg kg',desc:'Adult cardiac-arrest dose calculator'}
+];
+function toolSearchResults(query){
+ const q=normText(query).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ if(!q)return [];
+ const terms=q.split(/\s+/).filter(Boolean);
+ return searchableTools.filter(t=>terms.every(k=>(t.title+' '+t.terms+' '+t.desc).toLowerCase().includes(k)));
+}
+function openSearchTool(id){cat='Tools';quickSet=null;document.querySelector('#q').value='';tabs();renderTools();openToolCard(id);scrollTo(0,0)}
 function render(){
  if(cat==='Home'){renderHome();return}
  if(cat==='Tools'){renderTools();renderBurnMap();return}
@@ -390,7 +408,10 @@ function render(){
    a=searchResults();
  }
  if(quickSet&&quickGroups[quickSet]){const allowed=new Set(quickGroups[quickSet]);a=a.filter(x=>allowed.has(x.id));}
- document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'<div class="empty">'+(q?'No protocols match “'+esc(q)+'”.<br><button class="back" style="margin-top:12px" onclick="clearSearch()">Clear Search</button>':'No protocols found in this section.')+'</div>'
+ const toolHits=q&&cat==='All'?toolSearchResults(q):[];
+ const toolHtml=toolHits.length?'<div class="search-tool-group"><div class="related-title">Matching Field Tools</div>'+toolHits.map(t=>'<button class="tool-launch search-tool" onclick="openSearchTool(\''+t.id+'\')"><span class="tool-launch-icon">'+t.icon+'</span><span><b>'+esc(t.title)+'</b><small>'+esc(t.desc)+'</small></span><span class="tool-chevron">›</span></button>').join('')+'</div>':'';
+ const protocolHtml=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'';
+ document.querySelector('#list').innerHTML=toolHtml+protocolHtml||'<div class="empty">'+(q?'No protocols or tools match “'+esc(q)+'”.<br><button class="back" style="margin-top:12px" onclick="clearSearch()">Clear Search</button>':'No protocols found in this section.')+'</div>'
 }
 function toggleFav(id){fav.has(id)?fav.delete(id):fav.add(id);localStorage.setItem('pvfdFav',JSON.stringify([...fav]));render()}
 function sourceHref(x){
