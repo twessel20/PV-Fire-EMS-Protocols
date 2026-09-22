@@ -48,6 +48,9 @@ body{background:#f4f7fa}
 .protocol-mode.als{background:#eaf2f8;color:#173a5e;border-color:#b8cddd}
 .protocol-mode.bls{background:#eaf2f8;color:#173a5e;border-color:#b8cddd}
 .role-note{background:#eef4f8;border-color:#cad8e3;color:#334155}
+
+/* v54 clearer calculator inputs */
+.calc-field{margin-top:14px}.calc-field>label{display:block;font-size:13px;font-weight:850;color:#173a5e;margin-bottom:5px}.calc-field small{display:block;margin-top:5px;color:#64748b;line-height:1.35}.calc-pair{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:8px}.calc-pair>.calc-unit-input{min-width:0}.calc-unit-input{display:flex;align-items:stretch}.calc-unit-input .tool-input{min-width:0;margin-top:0;border-radius:10px 0 0 10px}.calc-unit-input span{display:flex;align-items:center;padding:0 10px;background:#eef4f8;border:1px solid #d1d5db;border-left:0;border-radius:0 10px 10px 0;font-size:12px;font-weight:800;color:#334155;white-space:nowrap}.calc-field>.tool-input,.calc-pair>.tool-input{margin-top:0}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -164,15 +167,13 @@ function openToolCard(which){
    <div class="tool-note" style="margin-top:10px">AHA-based cardiac arrest tool. The 2025 AHA adult cardiac arrest algorithm lists lidocaine 1–1.5 mg/kg IV/IO for the first dose; this calculator intentionally uses the department-selected 1.0 mg/kg value.</div></div>`;
  if(which==='dopamine')host.innerHTML=back+`
    <div class="tool-card"><h3>Dopamine Gravity-Drip Calculator</h3>
-   <div class="tool-note">Gravity tubing only — no pump output. Enter the ordered dose and the actual bag concentration, then choose a 10 or 60 gtt/mL set.</div>
-   <input id="dopWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Patient weight">
-   <select id="dopWeightUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select>
-   <input id="dopDose" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Ordered dose (mcg/kg/min)">
-   <input id="dopMg" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Dopamine in bag (mg)">
-   <input id="dopMl" class="tool-input" inputmode="decimal" type="number" min="0" step="1" placeholder="Total bag volume (mL)">
-   <select id="dopGtt" class="tool-input"><option value="10">10 gtt/mL tubing</option><option value="60">60 gtt/mL tubing</option></select>
+   <div class="tool-note">Gravity tubing only — no pump output. Enter the patient weight, ordered dose in <b>mcg/kg/min</b>, bag concentration, and tubing drop factor.</div>
+   <div class="calc-field"><label for="dopWeight">1. Patient weight</label><div class="calc-pair"><input id="dopWeight" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Enter weight"><select id="dopWeightUnit" class="tool-input"><option value="lb">lb</option><option value="kg">kg</option></select></div></div>
+   <div class="calc-field"><label for="dopDose">2. Ordered dopamine dose</label><div class="calc-unit-input"><input id="dopDose" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Enter dose"><span>mcg/kg/min</span></div><small>Enter the ordered micrograms per kilogram per minute.</small></div>
+   <div class="calc-field"><label>3. Dopamine bag</label><div class="calc-pair"><div class="calc-unit-input"><input id="dopMg" class="tool-input" inputmode="decimal" type="number" min="0" step="0.1" placeholder="Drug amount"><span>mg</span></div><div class="calc-unit-input"><input id="dopMl" class="tool-input" inputmode="decimal" type="number" min="0" step="1" placeholder="Bag volume"><span>mL</span></div></div><small>The calculator converts the medication amount from mg to mcg automatically.</small></div>
+   <div class="calc-field"><label for="dopGtt">4. Tubing</label><select id="dopGtt" class="tool-input"><option value="10">10 gtt/mL tubing</option><option value="60">60 gtt/mL tubing</option></select></div>
    <button class="tool-btn" onclick="calcDopamine()">Calculate gtt/min</button><div id="dopResult" class="tool-result" style="display:none"></div>
-   <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose × weight kg × drop factor) ÷ concentration (mcg/mL).</div></div>`;
+   <div class="tool-note" style="margin-top:10px"><b>Gravity math:</b> gtt/min = (dose mcg/kg/min × weight kg × drop factor gtt/mL) ÷ concentration mcg/mL.</div></div>`;
  if(which==='burn'){host.innerHTML=back+`
    <div class="tool-card"><h3>Burn Calculator — TBSA + Parkland</h3>
    <div class="tool-note">Estimate total body surface area using the Rule of Nines, then use that TBSA directly in the Parkland burn-volume calculation below.</div>
