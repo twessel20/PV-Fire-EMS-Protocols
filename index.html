@@ -247,73 +247,80 @@ function patientMedPlainSummary(name,classes,label){
   {m:['adderall','amphetamine','methylphenidate','ritalin','vyvanse','lisdexamfetamine','stimulant'],v:['Stimulant / ADHD medicine','Increases activity in parts of the brain and nervous system.','Used for ADHD or narcolepsy.','CNS stimulant']},
   {m:['quetiapine','seroquel','olanzapine','zyprexa','risperidone','risperdal','aripiprazole','abilify','antipsychotic'],v:['Mood / psychiatric medicine','Changes the activity of certain brain chemicals.','Used for conditions such as bipolar disorder, schizophrenia, or severe mood symptoms.','Atypical antipsychotic']}
  ];
- for(const r of rules) if(has(...r.m)) return {plain:r.v[0],drugClass:r.v[3]||r.v[0],moa:r.v[1],use:r.v[2]};
- return {plain:'Prescription medicine',drugClass:'Class not identified',moa:'See the detailed drug reference if you need more information about how it works.',use:'See the detailed drug reference if you need more information about why it is prescribed.'};
+ for(const r of rules) if(has(...r.m)) return {matched:true,plain:r.v[0],drugClass:r.v[3]||r.v[0],moa:r.v[1],use:r.v[2]};
+ return {matched:false,plain:'Prescription medicine',drugClass:'Class not identified',moa:'See the detailed drug reference if you need more information about how it works.',use:'See the detailed drug reference if you need more information about why it is prescribed.'};
 }
 
-async function loadPatientMedication(rxcui,fallbackName){
- const host=document.querySelector('#patientMedResult');host.innerHTML='<div class="patient-med-card"><b>Loading medication summary…</b></div>';
- let props=null,label=null,ingredientName='';
- try{const p=await fetch('https://rxnav.nlm.nih.gov/REST/rxcui/'+encodeURIComponent(rxcui)+'/properties.json');if(p.ok)props=(await p.json()).properties||null}catch(e){}
- const name=props?.name||fallbackName||'Medication';
- async function getLabel(search){
-  try{const r=await fetch('https://api.fda.gov/drug/label.json?search='+encodeURIComponent(search)+'&limit=1');if(r.ok)return (await r.json()).results?.[0]||null}catch(e){}
-  return null;
- }
- // An RxNorm search can return an ingredient-level concept (for example, losartan).
- // openFDA labels are usually product-level, so use progressively broader label matching.
- label=await getLabel('openfda.rxcui:"'+rxcui+'"');
- if(!label)label=await getLabel('openfda.generic_name:"'+name+'"');
- if(!label)label=await getLabel('openfda.substance_name:"'+name+'"');
- if(!label){
-  try{
-   const rel=await fetch('https://rxnav.nlm.nih.gov/REST/rxcui/'+encodeURIComponent(rxcui)+'/related.json?tty=IN+PIN');
-   if(rel.ok){
-    const groups=(await rel.json()).relatedGroup?.conceptGroup||[];
-    const ing=groups.flatMap(g=>g.conceptProperties||[]).find(v=>v?.name);
-    ingredientName=ing?.name||'';
-   }
-  }catch(e){}
-  if(ingredientName)label=await getLabel('openfda.substance_name:"'+ingredientName+'"');
- }
- const brand=(label?.openfda?.brand_name||[]).join(', ');
- const generic=(label?.openfda?.generic_name||[]).join(', ');
- let classParts=[...(label?.openfda?.pharm_class_epc||[]),...(label?.openfda?.pharm_class_cs||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
- if(!classParts.length){
-  try{
-   const cr=await fetch('https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui='+encodeURIComponent(rxcui)+'&relaSource=ATC');
-   if(cr.ok){
-    const cj=await cr.json();
-    classParts=(cj.rxclassDrugInfoList?.rxclassDrugInfo||[]).map(v=>v?.rxclassMinConceptItem?.className).filter(Boolean);
-   }
-  }catch(e){}
- }
- if(!classParts.length){
-  try{
-   const cr=await fetch('https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui='+encodeURIComponent(rxcui)+'&relaSource=MEDRT');
-   if(cr.ok){
-    const cj=await cr.json();
-    classParts=(cj.rxclassDrugInfoList?.rxclassDrugInfo||[]).map(v=>v?.rxclassMinConceptItem?.className).filter(Boolean);
-   }
-  }catch(e){}
- }
- const technicalClass=[...new Set(classParts)].join(' • ');
- const moaParts=[...(label?.openfda?.pharm_class_moa||[])].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
- const plain=patientMedPlainSummary(name,classParts,label);
- const drugClass=plain?.cls||(technicalClass||'Drug class information was not available for this medication.');
- const mechanism=plain?.moa||patientMedTrim(label?.mechanism_of_action||(moaParts.length?moaParts.join(' • '):'Mechanism information was not available for this medication.'),360);
- const indication=plain?.use||patientMedFallbackUse(label);
+function renderPatientMedCard(host,name,brand,generic,plain,rxcui){
  const dailymed='https://dailymed.nlm.nih.gov/dailymed/search.cfm?query='+encodeURIComponent(name);
- const rxnav='https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm='+encodeURIComponent(rxcui);
+ const rxnav='https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm='+encodeURIComponent(rxcui||'');
  host.innerHTML='<div class="patient-med-card"><h3>'+esc(name)+'</h3>'
    +(generic?'<div class="meta"><b>Generic:</b> '+esc(generic)+'</div>':'')
    +(brand?'<div class="meta"><b>Brand:</b> '+esc(brand)+'</div>':'')
-   +'<div class="patient-med-label">What kind of medicine is it?</div><div class="patient-med-copy"><b>'+esc(plainType)+'</b></div>'
-   +'<div class="patient-med-label">Drug class</div><div class="patient-med-copy"><b>'+esc(drugClass)+'</b></div>'
-   +'<div class="patient-med-label">How does it work?</div><div class="patient-med-copy">'+esc(mechanism)+'</div>'
-   +'<div class="patient-med-label">Why would a patient take it?</div><div class="patient-med-copy">'+esc(indication)+'</div>'
-   +'<div class="patient-med-links"><a class="patient-med-link" target="_blank" rel="noopener" href="'+dailymed+'">Detailed FDA / DailyMed Info ↗</a><a class="patient-med-link" target="_blank" rel="noopener" href="'+rxnav+'">RxNorm Drug Record ↗</a></div>'
-   +'<div class="patient-med-warning" style="margin-top:12px"><b>Field reference:</b> This section is for identifying and understanding a patient\'s home medication. It is not a treatment recommendation. Follow PVFire protocols and Medical Control for EMS care.</div></div>';
+   +'<div class="patient-med-label">What kind of medicine is it?</div><div class="patient-med-copy"><b>'+esc(plain.plain)+'</b></div>'
+   +'<div class="patient-med-label">Drug class</div><div class="patient-med-copy"><b>'+esc(plain.drugClass)+'</b></div>'
+   +'<div class="patient-med-label">How does it work?</div><div class="patient-med-copy">'+esc(plain.moa)+'</div>'
+   +'<div class="patient-med-label">Why would a patient take it?</div><div class="patient-med-copy">'+esc(plain.use)+'</div>'
+   +'<div class="patient-med-links"><a class="patient-med-link" target="_blank" rel="noopener" href="'+dailymed+'">Detailed FDA / DailyMed Info ↗</a>'
+   +(rxcui?'<a class="patient-med-link" target="_blank" rel="noopener" href="'+rxnav+'">RxNorm Drug Record ↗</a>':'')
+   +'</div><div class="patient-med-warning" style="margin-top:12px"><b>Field reference:</b> This section is for identifying and understanding a patient\'s home medication. It is not a treatment recommendation. Follow PVFire protocols and Medical Control for EMS care.</div></div>';
+}
+async function loadPatientMedication(rxcui,fallbackName){
+ const host=document.querySelector('#patientMedResult');
+ const firstPass=patientMedPlainSummary(fallbackName,[],null);
+
+ // Common medications render immediately from the built-in firefighter reference.
+ if(firstPass.matched){
+   renderPatientMedCard(host,fallbackName,'','',firstPass,rxcui);
+   return;
+ }
+
+ host.innerHTML='<div class="patient-med-card"><b>Loading medication summary…</b></div>';
+ let props=null,label=null,classParts=[];
+ try{
+   const p=await fetch('https://rxnav.nlm.nih.gov/REST/rxcui/'+encodeURIComponent(rxcui)+'/properties.json');
+   if(p.ok)props=(await p.json()).properties||null;
+ }catch(e){}
+ const name=props?.name||fallbackName||'Medication';
+
+ // Try the built-in reference again using the normalized RxNorm name.
+ const normalized=patientMedPlainSummary(name,[],null);
+ if(normalized.matched){
+   renderPatientMedCard(host,name,'','',normalized,rxcui);
+   return;
+ }
+
+ // For less-common drugs, request only the minimum class information needed.
+ try{
+   const cr=await fetch('https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui='+encodeURIComponent(rxcui)+'&relaSource=ATC');
+   if(cr.ok){
+     const cj=await cr.json();
+     classParts=(cj.rxclassDrugInfoList?.rxclassDrugInfo||[]).map(v=>v?.rxclassMinConceptItem?.className).filter(Boolean);
+   }
+ }catch(e){}
+ if(!classParts.length){
+   try{
+     const cr=await fetch('https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui='+encodeURIComponent(rxcui)+'&relaSource=MEDRT');
+     if(cr.ok){
+       const cj=await cr.json();
+       classParts=(cj.rxclassDrugInfoList?.rxclassDrugInfo||[]).map(v=>v?.rxclassMinConceptItem?.className).filter(Boolean);
+     }
+   }catch(e){}
+ }
+
+ let plain=patientMedPlainSummary(name,classParts,null);
+ let brand='',generic='';
+ if(!plain.matched){
+   try{
+     const lr=await fetch('https://api.fda.gov/drug/label.json?search='+encodeURIComponent('openfda.rxcui:"'+rxcui+'"')+'&limit=1');
+     if(lr.ok)label=(await lr.json()).results?.[0]||null;
+   }catch(e){}
+   brand=(label?.openfda?.brand_name||[]).join(', ');
+   generic=(label?.openfda?.generic_name||[]).join(', ');
+   plain=patientMedPlainSummary(name,classParts,label);
+ }
+
+ renderPatientMedCard(host,name,brand,generic,plain,rxcui);
 }
 
 function renderTools(){
