@@ -60,6 +60,9 @@ body{background:#f4f7fa}
 
 /* v57 searchable field tools */
 .search-tool-group{margin-bottom:14px}.search-tool{margin-bottom:8px}.search-tool-group .related-title{margin:2px 0 8px}
+
+/* v58 inline protocol tools */
+.inline-tool-slot:empty{display:none}.inline-tool-slot{margin:8px 0 14px}.inline-field-tool{box-shadow:none;border:1px solid #cad8e3;background:#fff}.protocol-tool-btn.open{background:#eaf2f8;border-color:#9fbdd3}.protocol-tool-btn.open .tool-chevron{transform:rotate(90deg)}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -717,11 +720,22 @@ function protocolToolLinks(x){
  if(['combined-general-medical','combined-general-trauma','patient-destination-criteria','combined-head-injury'].includes(x.id))tools.push(['🧠','Glasgow Coma Scale','gcs']);
  if(['combined-general-medical','combined-general-trauma'].includes(x.id))tools.push(['🚑','START Triage','start']);
  if(!tools.length)return '';
- return '<div class="protocol-tools"><div class="related-title">Field Tools</div>'+tools.map(t=>'<button class="protocol-tool-btn" onclick="openProtocolTool(\''+t[2]+'\')"><span>'+t[0]+'</span><b>'+t[1]+'</b><span class="tool-chevron">›</span></button>').join('')+'</div>';
+ return '<div class="protocol-tools"><div class="related-title">Field Tools — Use Here</div>'+tools.map(t=>'<button class="protocol-tool-btn" onclick="toggleInlineProtocolTool(\''+t[2]+'\',this)"><span>'+t[0]+'</span><b>'+t[1]+'</b><span class="tool-chevron">›</span></button><div class="inline-tool-slot" data-tool="'+t[2]+'"></div>').join('')+'</div>';
 }
-function openProtocolTool(which){
- const detail=document.querySelector('#detail'),list=document.querySelector('#list');
- detail.classList.remove('on');list.classList.remove('off');location.hash='';cat='Tools';quickSet=null;tabs();renderTools();openToolCard(which);scrollTo(0,0);
+function toolContent(which){
+ if(which==='apgar')return `<div class="tool-card inline-field-tool"><h3>APGAR Score</h3><div class="tool-note">Score each category 0, 1, or 2. PVFIRE Childbirth protocol documents APGAR at 1 and 5 minutes.</div><div class="score-grid">${scoreSelect('apAppearance','Appearance / color',[['0','Blue or pale all over'],['1','Body pink, extremities blue'],['2','Completely pink']])}${scoreSelect('apPulse','Pulse / heart rate',[['0','Absent'],['1','Below 100/min'],['2','100/min or greater']])}${scoreSelect('apGrimace','Grimace / reflex irritability',[['0','No response'],['1','Grimace'],['2','Cough, sneeze, cry, or active withdrawal']])}${scoreSelect('apActivity','Activity / muscle tone',[['0','Limp'],['1','Some flexion'],['2','Active motion']])}${scoreSelect('apResp','Respiration',[['0','Absent'],['1','Slow or irregular'],['2','Good respirations / strong cry']])}</div><div id="apgarResult" class="tool-result score-total"><b>APGAR: — / 10</b></div></div>`;
+ if(which==='gcs')return `<div class="tool-card inline-field-tool"><h3>Glasgow Coma Scale</h3><div class="tool-note">Select the best observed response in each category.</div><div class="score-grid">${scoreSelect('gcsEye','Eye opening',[['1','None'],['2','To pressure'],['3','To sound'],['4','Spontaneous']])}${scoreSelect('gcsVerbal','Verbal response',[['1','None'],['2','Incomprehensible sounds'],['3','Inappropriate words'],['4','Confused'],['5','Oriented']])}${scoreSelect('gcsMotor','Motor response',[['1','None'],['2','Extension'],['3','Abnormal flexion'],['4','Normal flexion / withdrawal'],['5','Localizes'],['6','Obeys commands']])}</div><div id="gcsResult" class="tool-result score-total"><b>GCS: — / 15</b></div></div>`;
+ if(which==='start')return `<div class="tool-card inline-field-tool"><h3>START Triage</h3><div class="tool-note"><b>Adult START decision aid.</b> Follow the prompts in order. This is an added field aid; the current PVFIRE protocol dataset directs crews to begin triage as needed but does not contain a department START algorithm.</div><div id="startBox" class="triage-box"></div><button class="tool-btn" style="background:#475569" onclick="resetStart()">Restart START Triage</button></div>`;
+ return '';
+}
+function toggleInlineProtocolTool(which,btn){
+ const slot=btn.nextElementSibling,opening=!slot.innerHTML;
+ document.querySelectorAll('.inline-tool-slot').forEach(x=>{if(x!==slot)x.innerHTML=''});
+ document.querySelectorAll('.protocol-tool-btn').forEach(x=>x.classList.remove('open'));
+ if(!opening){slot.innerHTML='';return}
+ slot.innerHTML=toolContent(which);btn.classList.add('open');
+ if(which==='start')resetStart();
+ slot.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function openP(id){
  let x=data.find(z=>z.id===id);if(!x)return;
