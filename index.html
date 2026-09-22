@@ -444,6 +444,10 @@ function calcProtocolDose(pid,key){
 }
 
 function formatProtocol(x){
+ if(x.id==='controlled-substance-verification'||x.id==='narcotic-accountability'){
+   const raw=(x.lines||[]).map(normText).filter(Boolean).filter(l=>l.toUpperCase()!=='PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS').filter(l=>!/^NARCOTIC ACCOUNTABILITY$/i.test(l)).filter(l=>!/^CONTROLLED SUBSTANCE VERIFICATION$/i.test(l));
+   return raw.map(t=>{let m=t.match(/^(\d+\.|[a-z]\.|[ivx]+\.)\s*(.*)$/i);if(m){let cls=/^\d/.test(m[1])?'bullet':/^[a-z]/i.test(m[1])?'subbullet':'subsub';return '<div class="line '+cls+'">'+esc(m[2]||t)+'</div>'}return '<div class="line para">'+esc(t)+'</div>'}).join('');
+ }
  if(x.category==='Medications')return formatMedication(x);
  let ts=scopedTokens(x);
  if(role==='EMT')ts=ts.filter(t=>t.heading||t.scope!=='als');
