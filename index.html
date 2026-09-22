@@ -211,7 +211,12 @@ function render(){
  document.querySelector('#list').innerHTML=a.length?a.map(x=>`<div class="card" onclick="openP('${x.id}')"><button class="fav" aria-label="favorite" onclick="event.stopPropagation();toggleFav('${x.id}')">${fav.has(x.id)?'★':'☆'}</button><div class="title">${esc(displayTitle(x))}</div><div class="meta">${esc(x.category)} • ${x.updated?`Updated ${esc(x.updated)}`:`2026 source`}</div></div>`).join(''):'<div class="empty">No matching appendix for this topic.</div>'
 }
 function toggleFav(id){fav.has(id)?fav.delete(id):fav.add(id);localStorage.setItem('pvfdFav',JSON.stringify([...fav]));render()}
-function sourceHref(x){if(x.sourceFile)return x.sourceFile;return x.pageUrl||''}
+function sourceHref(x){
+ const src=x.sourceFile||x.pageUrl||'';
+ const m=src.match(/#page=(\d+)/i);
+ if(m)return 'protocol-viewer.html?src='+encodeURIComponent(src.split('#')[0])+'&page='+encodeURIComponent(m[1])+'&title='+encodeURIComponent(displayTitle(x));
+ return src;
+}
 function normText(v){return String(v||'').replace(/\s+/g,' ').trim()}
 function sameTitle(a,b){return normText(a).toLowerCase().replace(/[^a-z0-9]+/g,'')===normText(b).toLowerCase().replace(/[^a-z0-9]+/g,'')}
 function isHeading(t){
