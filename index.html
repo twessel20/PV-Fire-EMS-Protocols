@@ -172,6 +172,7 @@ function renderTools(){
       <button class="tool-launch" onclick="openToolCard('burn')"><span class="tool-launch-icon">🔥</span><span><b>Burn Calculator — TBSA + Parkland</b><small>One tool: burn map, TBSA calculation, and Parkland fluid formula</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('apgar')"><span class="tool-launch-icon">👶</span><span><b>APGAR Score</b><small>Appearance, pulse, grimace, activity, respiration</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('gcs')"><span class="tool-launch-icon">🧠</span><span><b>Glasgow Coma Scale</b><small>Eye, verbal, and motor scoring</small></span><span class="tool-chevron">›</span></button>
+      <button class="tool-launch" onclick="openToolCard('cincinnati')"><span class="tool-launch-icon">🧠</span><span><b>Cincinnati Prehospital Stroke Scale</b><small>Facial droop, arm drift, and speech screen</small></span><span class="tool-chevron">›</span></button>
       <button class="tool-launch" onclick="openToolCard('start')"><span class="tool-launch-icon">🚑</span><span><b>START Triage</b><small>Step-by-step adult mass-casualty triage aid</small></span><span class="tool-chevron">›</span></button>
     </div>
     <div id="toolDetail"></div>`;
@@ -215,10 +216,12 @@ function openToolCard(which){
    ${scoreSelect('gcsMotor','Motor response',[['1','None'],['2','Extension'],['3','Abnormal flexion'],['4','Normal flexion / withdrawal'],['5','Localizes'],['6','Obeys commands']])}
    </div><div id="gcsResult" class="tool-result score-total"><b>GCS: — / 15</b></div>
    <div class="tool-note" style="margin-top:10px">PVFIRE uses GCS in patient assessment and trauma destination criteria; the official Glasgow reference is Appendix p.149.</div></div>`;
+ if(which==='cincinnati')host.innerHTML=back+toolContent('cincinnati');
  if(which==='start')host.innerHTML=back+`
    <div class="tool-card"><h3>START Triage</h3><div class="tool-note"><b>Adult START decision aid.</b> Follow the prompts in order. This tool is an added field aid; the current PVFIRE protocol dataset directs crews to begin triage as needed but does not contain a department START algorithm.</div>
    <div id="startBox" class="triage-box"></div><button class="tool-btn" style="background:#475569" onclick="resetStart()">Restart START Triage</button></div>`;
  if(which==='start')resetStart();
+ if(which==='cincinnati')document.querySelectorAll('#cpssFace,#cpssArm,#cpssSpeech').forEach(el=>el.addEventListener('change',updateCincinnati));
  if(which==='burn'){host.innerHTML=back+`
    <div class="tool-card"><h3>Burn Calculator — TBSA + Parkland</h3>
    <div class="tool-note">Estimate total body surface area using the Rule of Nines, then use that TBSA directly in the Parkland burn-volume calculation below.</div>
@@ -763,14 +766,24 @@ function protocolToolLinks(x){
  if(['childbirth','neonatal-resuscitation'].includes(x.id))tools.push(['👶','APGAR Score','apgar']);
  if(['combined-general-medical','combined-general-trauma','patient-destination-criteria','combined-head-injury'].includes(x.id))tools.push(['🧠','Glasgow Coma Scale','gcs']);
  if(['combined-general-medical','combined-general-trauma'].includes(x.id))tools.push(['🚑','START Triage','start']);
+ if(x.id==='adult-stroke')tools.push(['🧠','Cincinnati Prehospital Stroke Scale','cincinnati']);
  if(!tools.length)return '';
  return '<div class="protocol-tools"><div class="related-title">Field Tools — Use Here</div>'+tools.map(t=>'<button class="protocol-tool-btn" onclick="toggleInlineProtocolTool(\''+t[2]+'\',this)"><span>'+t[0]+'</span><b>'+t[1]+'</b><span class="tool-chevron">›</span></button><div class="inline-tool-slot" data-tool="'+t[2]+'"></div>').join('')+'</div>';
 }
 function toolContent(which){
  if(which==='apgar')return `<div class="tool-card inline-field-tool"><h3>APGAR Score</h3><div class="tool-note">Score each category 0, 1, or 2. PVFIRE Childbirth protocol documents APGAR at 1 and 5 minutes.</div><div class="score-grid">${scoreSelect('apAppearance','Appearance / color',[['0','Blue or pale all over'],['1','Body pink, extremities blue'],['2','Completely pink']])}${scoreSelect('apPulse','Pulse / heart rate',[['0','Absent'],['1','Below 100/min'],['2','100/min or greater']])}${scoreSelect('apGrimace','Grimace / reflex irritability',[['0','No response'],['1','Grimace'],['2','Cough, sneeze, cry, or active withdrawal']])}${scoreSelect('apActivity','Activity / muscle tone',[['0','Limp'],['1','Some flexion'],['2','Active motion']])}${scoreSelect('apResp','Respiration',[['0','Absent'],['1','Slow or irregular'],['2','Good respirations / strong cry']])}</div><div id="apgarResult" class="tool-result score-total"><b>APGAR: — / 10</b></div></div>`;
  if(which==='gcs')return `<div class="tool-card inline-field-tool"><h3>Glasgow Coma Scale</h3><div class="tool-note">Select the best observed response in each category.</div><div class="score-grid">${scoreSelect('gcsEye','Eye opening',[['1','None'],['2','To pressure'],['3','To sound'],['4','Spontaneous']])}${scoreSelect('gcsVerbal','Verbal response',[['1','None'],['2','Incomprehensible sounds'],['3','Inappropriate words'],['4','Confused'],['5','Oriented']])}${scoreSelect('gcsMotor','Motor response',[['1','None'],['2','Extension'],['3','Abnormal flexion'],['4','Normal flexion / withdrawal'],['5','Localizes'],['6','Obeys commands']])}</div><div id="gcsResult" class="tool-result score-total"><b>GCS: — / 15</b></div></div>`;
+ if(which==='cincinnati')return `<div class="tool-card inline-field-tool"><h3>Cincinnati Prehospital Stroke Scale</h3><div class="tool-note">PVFIRE Appendix: if any 1 of these 3 signs is abnormal, the probability of a stroke is 72%.</div><div class="score-grid">${scoreSelect('cpssFace','Facial Droop',[['0','Normal — both sides of the face move equally'],['1','Abnormal — one side of the face does not move as well as the other side']])}${scoreSelect('cpssArm','Arm Drift',[['0','Normal — both arms move the same or both arms do not move at all'],['1','Abnormal — one arm does not move or one arm drifts downward']])}${scoreSelect('cpssSpeech','Abnormal Speech',[['0','Normal — patient uses correct words with no slurring'],['1','Abnormal — patient slurs words, uses the wrong words, or is unable to speak']])}</div><div id="cpssResult" class="tool-result score-total"><b>Cincinnati: —</b></div><div class="tool-note" style="margin-top:10px"><b>Arm drift:</b> patient closes eyes and extends both arms straight out, palms up, for 10 seconds.<br><b>Facial droop:</b> patient shows teeth or smiles.<br><b>Speech:</b> patient repeats “you can’t teach an old dog new tricks.”</div></div>`;
  if(which==='start')return `<div class="tool-card inline-field-tool"><h3>START Triage</h3><div class="tool-note"><b>Adult START decision aid.</b> Follow the prompts in order. This is an added field aid; the current PVFIRE protocol dataset directs crews to begin triage as needed but does not contain a department START algorithm.</div><div id="startBox" class="triage-box"></div><button class="tool-btn" style="background:#475569" onclick="resetStart()">Restart START Triage</button></div>`;
  return '';
+}
+function updateCincinnati(){
+ const vals=['cpssFace','cpssArm','cpssSpeech'].map(id=>document.getElementById(id)).filter(Boolean);
+ const out=document.getElementById('cpssResult');if(!out)return;
+ const chosen=vals.map(x=>x.value).filter(v=>v!=='');
+ if(chosen.length<3){out.innerHTML='<b>Cincinnati: —</b><div class="dose-note">Complete all 3 findings.</div>';return}
+ const abnormal=chosen.reduce((n,v)=>n+(Number(v)===1?1:0),0);
+ out.innerHTML=abnormal?'<b>POSITIVE — '+abnormal+' abnormal finding'+(abnormal===1?'':'s')+'</b><div class="dose-note">PVFIRE: any 1 of the 3 signs abnormal = positive screen.</div>':'<b>NEGATIVE — 0 abnormal findings</b><div class="dose-note">No abnormal Cincinnati findings selected.</div>';
 }
 function toggleInlineProtocolTool(which,btn){
  const slot=btn.nextElementSibling,opening=!slot.innerHTML;
@@ -779,6 +792,7 @@ function toggleInlineProtocolTool(which,btn){
  if(!opening){slot.innerHTML='';return}
  slot.innerHTML=toolContent(which);btn.classList.add('open');
  if(which==='start')resetStart();
+ if(which==='cincinnati')document.querySelectorAll('#cpssFace,#cpssArm,#cpssSpeech').forEach(el=>el.addEventListener('change',updateCincinnati));
  slot.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function openP(id){
