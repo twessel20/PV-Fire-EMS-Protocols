@@ -1,0 +1,31 @@
+name: Process protocol updates
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'updates/single/*.pdf'
+      - 'updates/full/protocol-book.pdf'
+permissions:
+  contents: write
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install PyMuPDF
+      - run: python tools/reindex.py
+      - name: Commit generated protocol index
+        run: |
+          git config user.name "PVFIRE Protocol Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add protocols.json updates
+          if git diff --cached --quiet; then
+            echo "No changes to publish"
+          else
+            git commit -m "Publish protocol update"
+            git push
+          fi
