@@ -20,43 +20,26 @@ body{background:var(--pv-paper)}
 .guide-steps{border-top:4px solid var(--pv-yellow)}
 .notice{border-left:5px solid #f59e0b}.related-box{border-top:4px solid var(--pv-yellow)}
 @media(max-width:600px){.logo{width:68px;height:85px;flex-basis:68px}.brand{font-size:18px}}
-.tabicon{margin-right:5px}.protocol-icon{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-right:8px;border-radius:8px;background:#f5f5f4;font-size:19px;vertical-align:middle}.card .title{display:flex;align-items:center;padding-right:32px}.card .fav+.title{padding-right:0}.quick-card b{font-size:15px}.guide-steps h3:before{content:'🚒 ';}.home-alert:before{content:'⚠️ ';}
-/* Simplified professional clinical theme */
-:root{--pv-accent:#991b1b;--pv-ink:#172033;--pv-muted:#64748b;--pv-line:#e2e8f0;--pv-bg:#f6f7f9}
-body{background:var(--pv-bg);color:var(--pv-ink)}
-.top{background:#20252d;border-bottom:3px solid var(--pv-accent);box-shadow:none}
-.sub{color:#e5e7eb}.rolebtn.on{background:#fff;color:var(--pv-accent);border-color:#fff;box-shadow:none}
-.tabs{background:#fff;border-bottom:1px solid var(--pv-line)}.tab{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}.tab.on{background:var(--pv-accent);border-color:var(--pv-accent);box-shadow:none}
-.tabicon{display:inline-flex;min-width:18px;justify-content:center;margin-right:5px;font-family:Arial,sans-serif;font-weight:900}
-.card{border:1px solid var(--pv-line);border-left:4px solid #cbd5e1;box-shadow:0 1px 3px #0000000d}.card:active{border-left-color:var(--pv-accent)}
-.protocol-icon,.pro-icon{display:inline-flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-weight:900;font-style:normal;color:var(--pv-accent);background:#f8fafc;border:1px solid #e2e8f0}
-.protocol-icon{width:30px;height:30px;margin-right:8px;border-radius:7px;font-size:16px}.pro-icon{width:24px;height:24px;border-radius:6px;margin-right:3px}.pro-icon.rx{font-size:11px}
-.home-hero{background:#fff;color:var(--pv-ink);border:1px solid var(--pv-line);border-top:4px solid var(--pv-accent);box-shadow:none}.home-hero h2{color:var(--pv-accent)}.home-hero p{color:#334155}
-.quick-card{border:1px solid var(--pv-line);border-top:1px solid var(--pv-line);box-shadow:none}.quick-card b{color:var(--pv-ink)}
-.section{background:#f8fafc;color:var(--pv-accent);border:1px solid var(--pv-line);border-left:4px solid var(--pv-accent);margin-left:0;margin-right:0}
-.guide-steps{border-top:1px solid var(--pv-line)}.guide-steps h3:before{content:''}.home-alert:before{content:''}
-</style></head><body>
+.tabicon{margin-right:5px}.protocol-icon{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-right:8px;border-radius:8px;background:#f5f5f4;font-size:19px;vertical-align:middle}.card .title{display:flex;align-items:center;padding-right:32px}.card .fav+.title{padding-right:0}.quick-card b{font-size:15px}.guide-steps h3:before{content:'🚒 ';}.home-alert:before{content:'⚠️ ';}</style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="pvfd-logo.jpg" alt="Pleasant Valley Fire Department patch"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
-let data=[],cat='Home';const cats=['All','Favorites','Cardiac','Respiratory','Medical','Trauma','Procedures','Medications','Guidelines','Appendix','Tools'];
-const catIcons={All:'▦',Favorites:'★',Cardiac:'♥',Respiratory:'◫',Medical:'✚',Trauma:'◆',Procedures:'⚙',Medications:'Rx',Guidelines:'§',Appendix:'≡',Tools:'ƒx'};
-const cardiacProtocol=x=>/chest pain|stemi|bradycardia|tachycardia|ventricular fibrillation|ventricular tachycardia|asystole|pea|cardiac arrest|post.resuscitation|12.lead|transcutaneous pacing|lucas/i.test([x.id,x.title,x.search,(x.aliases||[]).join(' ')].join(' '));
-const respiratoryProtocol=x=>/airway|asthma|copd|wheez|respirat|pulmonary edema|chf|obstructed airway|cpap|end tidal|etco2|intubat|i.gel/i.test([x.id,x.title,x.search,(x.aliases||[]).join(' ')].join(' '));
+let data=[],cat='Home';const cats=['All','Favorites','Medical','Trauma','Procedures','Medications','Guidelines','Appendix','Tools'];
+const catIcons={All:'📋',Favorites:'⭐',Medical:'🩺',Trauma:'🩸',Procedures:'🛠️',Medications:'💊',Guidelines:'📖',Appendix:'📚',Tools:'🧮'};
 const protocolIcon=x=>{
- if(cardiacProtocol(x))return '♥';
- if(respiratoryProtocol(x))return '◫';
  const t=(displayTitle(x)+' '+(x.search||'')+' '+(x.aliases||[]).join(' ')).toLowerCase();
- if(/burn|thermal/.test(t))return '△';
- if(/stroke|seizure|syncope|altered mental|neurolog/.test(t))return 'N';
- if(/pediatric|child|infant|neonatal|brue/.test(t))return 'P';
- if(/childbirth|pregnan|obstetric/.test(t))return 'OB';
- if(/trauma|injury|fracture|spinal|head|chest seal|tourniquet|cat /.test(t))return '◆';
- if(x.category==='Medications')return 'Rx';
- if(x.category==='Procedures')return '⚙';
- if(x.category==='Appendix')return '≡';
- if(x.category==='Guidelines')return '§';
- return x.category==='Medical'?'✚':'•';
-}let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
+ if(/burn|thermal/.test(t))return '🔥';
+ if(/cardiac|chest pain|stemi|brady|tachy|fibrillation|asystole|pea|resuscitation/.test(t))return '🫀';
+ if(/airway|asthma|copd|wheez|respirat|pulmonary|chf|oxygen/.test(t))return '🫁';
+ if(/stroke|seizure|syncope|altered mental|neurolog/.test(t))return '🧠';
+ if(/pediatric|child|infant|neonatal|brue/.test(t))return '👶';
+ if(/childbirth|pregnan|obstetric/.test(t))return '🤰';
+ if(/trauma|injury|fracture|spinal|head|chest seal|tourniquet|cat /.test(t))return '🩸';
+ if(x.category==='Medications')return '💊';
+ if(x.category==='Procedures')return '🛠️';
+ if(x.category==='Appendix')return '📚';
+ if(x.category==='Guidelines')return '📖';
+ return x.category==='Medical'?'🩺':'📋';
+};let fav=new Set(JSON.parse(localStorage.getItem('pvfdFav')||'[]'));let role=localStorage.getItem('pvfdRole')||'PARAMEDIC';
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function tabs(){let visible=role==='EMT'?cats.filter(c=>c!=='Medications'):cats;document.querySelector('#tabs').innerHTML=visible.map(c=>`<button class="tab ${c===cat?'on':''}" onclick="setCat('${c}')"><span class="tabicon">${catIcons[c]||'📋'}</span>${c}</button>`).join('')}
 function leaveDetail(){location.hash='';document.querySelector('#detail').classList.remove('on');document.querySelector('#list').classList.remove('off')}
@@ -72,12 +55,10 @@ function renderHome(){
     <p>Choose your certification level, search the patient problem or medication, then open the matching protocol. Use the source button whenever exact department wording or layout is needed.</p>
    </div>
    <div class="quick-grid">
-    <button class="quick-card" onclick="setCat('Cardiac')"><b><span class="pro-icon">♥</span> Cardiac</b><span>Chest pain, dysrhythmias, arrest and post-resuscitation.</span></button>
-    <button class="quick-card" onclick="setCat('Respiratory')"><b><span class="pro-icon">◫</span> Respiratory</b><span>Airway, asthma/COPD, wheezing, CHF and respiratory care.</span></button>
-    <button class="quick-card" onclick="setCat('Medical')"><b><span class="pro-icon">✚</span> Medical</b><span>All medical protocols, including pediatric and OB.</span></button>
-    <button class="quick-card" onclick="setCat('Trauma')"><b><span class="pro-icon">◆</span> Trauma</b><span>Trauma protocols, burns and injury-specific care.</span></button>
-    <button class="quick-card" onclick="setCat('Medications')"><b><span class="pro-icon rx">Rx</span> Medications</b><span>Drug reference, dosing and supported calculators.</span></button>
-    <button class="quick-card" onclick="setCat('Procedures')"><b><span class="pro-icon">⚙</span> Procedures</b><span>Airway, vascular access, monitoring and field procedures.</span></button>
+    <button class="quick-card" onclick="setCat('Medical')"><b>🩺 Medical</b><span>Medical emergencies, cardiac, airway, pediatric and OB.</span></button>
+    <button class="quick-card" onclick="setCat('Trauma')"><b>🩸 Trauma</b><span>Trauma protocols, burns and injury-specific care.</span></button>
+    <button class="quick-card" onclick="setCat('Medications')"><b>💊 Medications</b><span>Quick drug reference, dosing and weight-based calculators.</span></button>
+    <button class="quick-card" onclick="setCat('Procedures')"><b>🛠️ Procedures</b><span>Airway, vascular access, monitoring and field procedures.</span></button>
    </div>
    <div class="guide-steps">
     <h3>Quick use guide</h3>
@@ -312,7 +293,7 @@ function render(){
  const directMatch=x=>!query||searchableTitle(x).includes(query)||directSearchText(x).includes(query)||queryTerms.every(t=>directSearchText(x).includes(t));
  const bodyMatch=x=>!query||queryTerms.every(t=>bodySearchText(x).includes(t));
  const scopeAllowed=x=>!(role==='EMT'&&(isAlsOnly(x)||x.category==='Medications'));
- const categoryAllowed=x=>cat==='All'||(cat==='Favorites'?fav.has(x.id):cat==='Cardiac'?cardiacProtocol(x):cat==='Respiratory'?respiratoryProtocol(x):x.category===cat);
+ const categoryAllowed=x=>cat==='All'||(cat==='Favorites'?fav.has(x.id):x.category===cat);
  const searchRank=x=>{
    if(!query)return 0;
    const title=searchableTitle(x),aliases=searchText((x.aliases||[]).join(' '));
