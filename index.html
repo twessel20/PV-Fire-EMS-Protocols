@@ -31,6 +31,15 @@ body{background:#f4f7fa}
 .tool-launch{width:100%;display:grid;grid-template-columns:46px 1fr 20px;align-items:center;gap:10px;text-align:left;background:#fff;border:1px solid #d8e3ec;border-radius:14px;padding:15px;color:#1f2937;box-shadow:0 1px 3px #0000000d;cursor:pointer}
 .tool-launch-icon{width:42px;height:42px;border-radius:10px;background:#eef4f8;color:#173a5e;display:grid;place-items:center;font-size:20px;font-weight:900}
 .tool-launch b{display:block;color:#173a5e;font-size:16px}.tool-launch small{display:block;color:#64748b;font-size:12px;line-height:1.35;margin-top:3px}.tool-chevron{font-size:28px;color:#64748b}.tool-back{margin:0 0 10px}
+
+/* v52 medication readability */
+.med-section{display:grid;gap:0}
+.med-label{margin-top:18px}
+.med-label:first-child{margin-top:0}
+.med-item,.med-dose,.med-text{line-height:1.45}
+.med-item{display:block;margin:7px 0;padding-left:0}
+.med-dose{display:block;margin:9px 0;font-weight:750}
+.med-dose+.med-dose{margin-top:7px}
 </style></head><body>
 <div id="offline" class="offline">Offline mode — showing the most recently cached protocol set.</div>
 <div class="top"><div class="headrow"><img class="logo" src="https://i.ebayimg.com/images/g/LaYAAOSwH8RlzC6r/s-l1200.png" alt="Pleasant Valley Fire Department logo"><div><div class="brand">Pleasant Valley Fire Department EMS Protocols</div><div class="sub" id="ver">Field Reference</div></div><div class="status" id="net">Online</div></div><div class="rolebar"><button class="homebtn" onclick="goHome()">⌂ Home</button><button id="emtBtn" class="rolebtn" onclick="setRole('EMT')">EMT / BLS</button><button id="medicBtn" class="rolebtn" onclick="setRole('PARAMEDIC')">Paramedic / ALS</button></div><div class="searchrow"><input id="q" class="search" type="search" autocomplete="off" placeholder="Search protocols, medications, symptoms…"><button id="clearQ" class="clearsearch" onclick="clearSearch()" aria-label="Clear search">Clear</button></div></div><div id="tabs" class="tabs"></div><main class="wrap"><div id="list" class="list"></div><div id="detail" class="detail"></div><div class="footer">Quick-reference tool. Department protocol source and Medical Control remain authoritative.</div></main><script>
@@ -407,19 +416,28 @@ function formatMedication(x){
    .filter(l=>!/^PLEASANT VALLEY FIRE DEPARTMENT EMS PROTOCOLS$/i.test(l))
    .filter(l=>!sameTitle(l,x.title));
  const headingRx=/^(PHARMACOLOGY AND ACTIONS|PHARMACOLOGY|CLASS|ACTIONS|INDICATIONS|CONTRAINDICATIONS|PRECAUTIONS|SIDE EFFECTS|ADVERSE REACTIONS|DOSE|DOSES|DOSAGE|DOSAGE\/ADMINISTRATION|ADMINISTRATION|ROUTE|ROUTES|PROTOCOL USED IN|PROTOCOLS USED IN|PROTOCOL PAGES|SPECIAL CONSIDERATIONS|PHARMACOKINETICS)\s*:?$/i;
- let html='';
+ const sectionListRx=/^(INDICATIONS|CONTRAINDICATIONS|PRECAUTIONS|SIDE EFFECTS|ADVERSE REACTIONS|DOSE|DOSES|DOSAGE|DOSAGE\/ADMINISTRATION|ADMINISTRATION|ROUTE|ROUTES|PROTOCOL USED IN|PROTOCOLS USED IN)$/i;
+ const doseLeadRx=/^(VF\/PULSELESS VT|WIDE COMPLEX TACH|ADULTS?|PEDS|PEDIATRICS?|CONTACT MEDICAL CONTROL)\s*:?/i;
+ let html='',section='';
  for(let i=0;i<raw.length;i++){
    let t=raw[i];
-   if(headingRx.test(t)){html+='<div class="med-label">'+esc(t.replace(/:$/,''))+'</div>';continue}
-   let parts=[t];
-   while(i+1<raw.length&&!headingRx.test(raw[i+1])&&!/^[•▪]$/.test(raw[i+1])&&!/^(\d+\.|[a-z]\.|[ivx]+\.)\s+/i.test(raw[i+1])&&!/^(ADULTS?|PEDS|PEDIATRICS?)\s*:?$/i.test(raw[i+1])){
-     if(/[.!?;:]$/.test(parts.at(-1)))break;
-     parts.push(raw[++i]);
+   if(headingRx.test(t)){section=t.replace(/:$/,'').toUpperCase();html+='<div class="med-label">'+esc(t.replace(/:$/,''))+'</div>';continue}
+   // Join only obvious PDF line wraps. Keep clinical list items/doses/protocol names on their own lines.
+   while(i+1<raw.length&&!headingRx.test(raw[i+1])){
+     let n=raw[i+1];
+     const doseSection=/^(DOSE|DOSES|DOSAGE|DOSAGE\/ADMINISTRATION|ADMINISTRATION)$/.test(section);
+     const listSection=sectionListRx.test(section);
+     const continuation=/^(minutes?|mg|mcg|mL|mEq|IV|IO|IM|IN)\b/i.test(n);
+     if(doseSection&&continuation){t=normText(t+' '+n);i++;continue}
+     if(!listSection&&!/[.!?;:]$/.test(t)&&/^[a-z(]/.test(n)){t=normText(t+' '+n);i++;continue}
+     break;
    }
-   t=normText(parts.join(' '));
    if(/^(ADULTS?|PEDS|PEDIATRICS?)\s*:?$/i.test(t)){html+='<div class="med-subhead">'+esc(t.replace(/:$/,''))+'</div>';continue}
    if(/^[•▪]$/.test(t)&&raw[i+1]){html+='<div class="med-item">'+esc(raw[++i])+'</div>';continue}
-   html+='<div class="med-text">'+esc(t)+'</div>';
+   const doseSection=/^(DOSE|DOSES|DOSAGE|DOSAGE\/ADMINISTRATION|ADMINISTRATION)$/.test(section);
+   const listSection=sectionListRx.test(section);
+   let cls=doseSection?(doseLeadRx.test(t)?'med-dose':'med-item'):(listSection?'med-item':'med-text');
+   html+='<div class="'+cls+'">'+esc(t)+'</div>';
  }
  return '<div class="med-section">'+html+'</div>';
 }
