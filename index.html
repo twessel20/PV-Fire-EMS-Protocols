@@ -176,7 +176,7 @@ function renderPatientMeds(){
   <div class="patient-med-shell">
    <div class="patient-med-search">
     <h2>🧾 Patient Home-Medication Lookup</h2>
-    <div class="tool-note">Search a medication the patient already takes. Brand names, generic names, and close spellings are supported. This is separate from PVFire treatment medications.</div>
+    <div class="tool-note">Search a medication the patient already takes. Get a quick field summary of the drug class, how it works, and why it is commonly prescribed. Brand names, generic names, and close spellings are supported.</div>
     <div class="patient-med-row">
      <input id="patientMedQ" class="tool-input" type="search" autocomplete="off" placeholder="Example: Eliquis, apixaban, metoprolol">
      <button class="tool-btn" onclick="lookupPatientMedication()">Look Up</button>
@@ -206,29 +206,41 @@ async function lookupPatientMedication(){
  }
 }
 async function loadPatientMedication(rxcui,fallbackName){
- const host=document.querySelector('#patientMedResult');host.innerHTML='<div class="patient-med-card"><b>Loading medication details…</b></div>';
+ const host=document.querySelector('#patientMedResult');host.innerHTML='<div class="patient-med-card"><b>Loading medication summary…</b></div>';
  let props=null,label=null;
  try{const p=await fetch('https://rxnav.nlm.nih.gov/REST/rxcui/'+encodeURIComponent(rxcui)+'/properties.json');if(p.ok)props=(await p.json()).properties||null}catch(e){}
  try{const l=await fetch('https://api.fda.gov/drug/label.json?search=openfda.rxcui:%22'+encodeURIComponent(rxcui)+'%22&limit=1');if(l.ok)label=(await l.json()).results?.[0]||null}catch(e){}
- const name=props?.name||fallbackName||'Medication',brand=(label?.openfda?.brand_name||[]).join(', '),generic=(label?.openfda?.generic_name||[]).join(', '),mfr=(label?.openfda?.manufacturer_name||[]).join(', ');
- const indication=patientMedTrim(label?.indications_and_usage||label?.purpose||'FDA label indication text was not available for this exact RxNorm match.');
- const contraind=patientMedTrim(label?.contraindications||'No contraindication section was returned for this exact label match.');
- const warnings=patientMedTrim(label?.boxed_warning||label?.warnings||label?.warnings_and_cautions||'No warning section was returned for this exact label match.');
- const adverse=patientMedTrim(label?.adverse_reactions||'No adverse-reaction section was returned for this exact label match.');
- const interactions=patientMedTrim(label?.drug_interactions||'No drug-interaction section was returned for this exact label match.');
+ const name=props?.name||fallbackName||'Medication';
+ const brand=(label?.openfda?.brand_name||[]).join(', ');
+ const generic=(label?.openfda?.generic_name||[]).join(', ');
+ const classParts=[
+   ...(label?.openfda?.pharm_class_epc||[]),
+   ...(label?.openfda?.pharm_class_cs||[])
+ ].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
+ const drugClass=[...new Set(classParts)].join(' • ')||'Drug class was not available for this exact FDA label match.';
+ const moaParts=[
+   ...(label?.openfda?.pharm_class_moa||[])
+ ].map(v=>String(v).replace(/\s*\[[^\]]+\]\s*$/,'').trim()).filter(Boolean);
+ const mechanism=patientMedTrim(
+   label?.mechanism_of_action||
+   (moaParts.length?moaParts.join(' • '):'Mechanism of action was not available for this exact FDA label match.'),
+   700
+ );
+ const indication=patientMedTrim(
+   label?.indications_and_usage||label?.purpose||
+   'Indication information was not available for this exact FDA label match.',
+   800
+ );
  const dailymed='https://dailymed.nlm.nih.gov/dailymed/search.cfm?query='+encodeURIComponent(name);
  const rxnav='https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm='+encodeURIComponent(rxcui);
  host.innerHTML='<div class="patient-med-card"><h3>'+esc(name)+'</h3>'
    +(generic?'<div class="meta"><b>Generic:</b> '+esc(generic)+'</div>':'')
    +(brand?'<div class="meta"><b>Brand:</b> '+esc(brand)+'</div>':'')
-   +(mfr?'<div class="meta"><b>Manufacturer:</b> '+esc(mfr)+'</div>':'')
-   +'<div class="patient-med-label">Common / labeled use</div><div class="patient-med-copy">'+esc(indication)+'</div>'
-   +'<div class="patient-med-label">Contraindications</div><div class="patient-med-copy">'+esc(contraind)+'</div>'
-   +'<div class="patient-med-label">Warnings</div><div class="patient-med-copy">'+esc(warnings)+'</div>'
-   +'<div class="patient-med-label">Adverse reactions</div><div class="patient-med-copy">'+esc(adverse)+'</div>'
-   +'<div class="patient-med-label">Drug interactions</div><div class="patient-med-copy">'+esc(interactions)+'</div>'
-   +'<div class="patient-med-links"><a class="patient-med-link" target="_blank" rel="noopener" href="'+dailymed+'">DailyMed ↗</a><a class="patient-med-link" target="_blank" rel="noopener" href="'+rxnav+'">RxNav ↗</a></div>'
-   +'<div class="patient-med-warning" style="margin-top:12px"><b>Source note:</b> Medication identity is resolved through U.S. National Library of Medicine RxNorm. Drug-label sections are retrieved from FDA labeling when an exact RxNorm-linked label is available. Verify the patient\'s actual bottle/list when medication identity matters.</div></div>';
+   +'<div class="patient-med-label">Drug class</div><div class="patient-med-copy">'+esc(drugClass)+'</div>'
+   +'<div class="patient-med-label">Mechanism of action</div><div class="patient-med-copy">'+esc(mechanism)+'</div>'
+   +'<div class="patient-med-label">What it is prescribed for</div><div class="patient-med-copy">'+esc(indication)+'</div>'
+   +'<div class="patient-med-links"><a class="patient-med-link" target="_blank" rel="noopener" href="'+dailymed+'">Detailed FDA / DailyMed Info ↗</a><a class="patient-med-link" target="_blank" rel="noopener" href="'+rxnav+'">RxNorm Drug Record ↗</a></div>'
+   +'<div class="patient-med-warning" style="margin-top:12px"><b>Field reference:</b> This section is for identifying and understanding a patient\'s home medication. It is not a treatment recommendation. Follow PVFire protocols and Medical Control for EMS care.</div></div>';
 }
 
 function renderTools(){
