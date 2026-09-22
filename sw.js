@@ -1,4 +1,4 @@
-const C='pvfire-ems-shell-v21';
+const C='pvfire-ems-shell-v22';
 const SHELL=['./','index.html','protocols.json','manifest.webmanifest'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
